@@ -41,7 +41,7 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.25rem 1.5rem',
+          padding: '1.25rem 1.4rem',
           borderBottom: '1px solid var(--border-color)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -53,15 +53,16 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
               color: '#34d399',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
               <RefreshCw size={20} />
             </div>
             <div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
-                تمدید بسته و ثبت دوره جدید
+                تمدید بسته و دوره جدید
               </h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                 هنرجو: <strong style={{ color: 'var(--text-primary)' }}>{student.name}</strong> ({student.discipline})
               </p>
             </div>
@@ -71,8 +72,8 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.4rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-secondary)' }}>
                 تعداد جلسات دوره جدید
@@ -89,7 +90,6 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
                   setFee(newFee);
                   setPaid(newFee);
                 }}
-                style={{ width: '100%' }}
               />
             </div>
 
@@ -101,40 +101,38 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
                 type="text"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                style={{ width: '100%', direction: 'ltr', textAlign: 'center' }}
+                style={{ direction: 'ltr', textAlign: 'center' }}
               />
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-secondary)' }}>
-                شهریه کل این بسته (تومان)
+                شهریه کل دوره (تومان)
               </label>
               <input
                 type="number"
                 step="50000"
                 value={fee}
                 onChange={(e) => setFee(Number(e.target.value))}
-                style={{ width: '100%' }}
               />
             </div>
 
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-secondary)' }}>
-                مبلغ واریزی فعلی (تومان)
+                مبلغ پرداختی فعلی (تومان)
               </label>
               <input
                 type="number"
                 step="50000"
                 value={paid}
                 onChange={(e) => setPaid(Number(e.target.value))}
-                style={{ width: '100%' }}
               />
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-secondary)' }}>
                 روش واریز شهریه
@@ -142,7 +140,6 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                style={{ width: '100%' }}
               >
                 <option value="کارت به کارت">کارت به کارت</option>
                 <option value="کارتخوان آموزشگاه">کارتخوان آموزشگاه</option>
@@ -153,7 +150,7 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
 
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-secondary)' }}>
-                وضعیت حساب جدید
+                وضعیت حساب دوره جدید
               </label>
               <div style={{
                 padding: '0.65rem',
@@ -181,7 +178,6 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="مثال: تمدید بسته پاییزه به همراه دریافت فیش واریزی"
-              style={{ width: '100%' }}
             />
           </div>
 
@@ -198,7 +194,7 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
             </button>
             <button type="submit" className="btn btn-success">
               <CheckCircle2 size={16} />
-              ثبت و تمدید بسته جدید
+              ثبت و تمدید دوره جدید
             </button>
           </div>
         </form>

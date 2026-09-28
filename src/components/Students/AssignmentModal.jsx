@@ -59,7 +59,7 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.25rem 1.5rem',
+          padding: '1.25rem 1.4rem',
           borderBottom: '1px solid var(--border-color)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -71,7 +71,8 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
               color: 'var(--accent-gold)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
               <BookOpen size={20} />
             </div>
@@ -89,7 +90,7 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.4rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
               عنوان قطعه، اتود یا تمرین *
@@ -100,7 +101,6 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="مثال: چهارمضراب ابوعطا صبا یا اتود شماره ۵"
               required
-              style={{ width: '100%' }}
             />
           </div>
 
@@ -113,11 +113,11 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="مثال: تمرکز روی ریزهای نرم با ریتم ۶/۸، صفحه ۴۲ کتاب... سرعت مترونوم ۷۲"
-              style={{ width: '100%', resize: 'vertical' }}
+              style={{ resize: 'vertical' }}
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 تاریخ ارائه (شمسی)
@@ -127,7 +127,7 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
                 value={formData.dateAssigned}
                 onChange={(e) => setFormData({ ...formData, dateAssigned: e.target.value })}
                 placeholder="1403/07/01"
-                style={{ width: '100%', direction: 'ltr', textAlign: 'center' }}
+                style={{ direction: 'ltr', textAlign: 'center' }}
               />
             </div>
             <div>
@@ -139,7 +139,7 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
                 value={formData.dueDate}
                 onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                 placeholder="1403/07/08"
-                style={{ width: '100%', direction: 'ltr', textAlign: 'center' }}
+                style={{ direction: 'ltr', textAlign: 'center' }}
               />
             </div>
           </div>
@@ -148,7 +148,7 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
             <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
               وضعیت ارزیابی تکلیف
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem' }}>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, status: 'in_progress' })}
@@ -220,7 +220,6 @@ export function AssignmentModal({ isOpen, onClose, onSave, editingAssignment = n
               value={formData.teacherNote}
               onChange={(e) => setFormData({ ...formData, teacherNote: e.target.value })}
               placeholder="مثال: تکنیک مضراب عالی بود، روی تمپوی پایانی کار شود."
-              style={{ width: '100%' }}
             />
           </div>
 

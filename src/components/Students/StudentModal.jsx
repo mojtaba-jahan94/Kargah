@@ -125,7 +125,8 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
 
     const payload = {
       ...formData,
-      id: editingStudent ? editingStudent.name : `std-${Date.now()}`,
+      // BUG FIX: use editingStudent.id instead of editingStudent.name
+      id: editingStudent ? editingStudent.id : `std-${Date.now()}`,
       packageTotalSessions: Number(formData.packageTotalSessions) || 8,
       sessionsCompleted: Number(formData.sessionsCompleted) || 0,
       sessionFee: Number(formData.sessionFee) || 0,
@@ -162,7 +163,8 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
               color: 'var(--accent-violet)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
               <User size={20} />
             </div>
@@ -181,9 +183,9 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
           {/* Row 1: Name & Phone */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 نام و نام خانوادگی هنرجو *
@@ -194,7 +196,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="مثال: کیهان کلهر"
                 required
-                style={{ width: '100%' }}
               />
             </div>
             <div>
@@ -206,13 +207,13 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="مثال: ۰۹۱۲۱۲۳۴۵۶۷"
-                style={{ width: '100%', direction: 'ltr', textAlign: 'right' }}
+                style={{ direction: 'ltr', textAlign: 'right' }}
               />
             </div>
           </div>
 
           {/* Row 2: Art Discipline & Level */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 ساز یا رشته تخصصی هنر *
@@ -220,7 +221,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
               <select
                 value={formData.discipline}
                 onChange={(e) => setFormData({ ...formData, discipline: e.target.value })}
-                style={{ width: '100%' }}
               >
                 {ART_DISCIPLINES.map(art => (
                   <option key={art} value={art}>{art}</option>
@@ -235,7 +235,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
               <select
                 value={formData.level}
                 onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                style={{ width: '100%' }}
               >
                 <option value="مقدماتی">مقدماتی (Level 1)</option>
                 <option value="متوسط">متوسط (Level 2)</option>
@@ -246,7 +245,7 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
           </div>
 
           {/* Row 3: Location & Start Date */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 موقعیت / آموزشگاه *
@@ -254,7 +253,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
               <select
                 value={formData.locationId}
                 onChange={(e) => handleLocationChange(e.target.value)}
-                style={{ width: '100%' }}
               >
                 {locations.map(loc => (
                   <option key={loc.id} value={loc.id}>
@@ -273,7 +271,7 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                 value={formData.startDate}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 placeholder="1403/07/01"
-                style={{ width: '100%', direction: 'ltr', textAlign: 'center' }}
+                style={{ direction: 'ltr', textAlign: 'center' }}
               />
             </div>
           </div>
@@ -285,7 +283,7 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
             borderRadius: '12px',
             padding: '1.1rem',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.4rem' }}>
               <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
                 تنظیم بسته و وضعیت شهریه
               </span>
@@ -294,7 +292,7 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.3rem', color: 'var(--text-secondary)' }}>
                   تعداد کل جلسات بسته
@@ -305,7 +303,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                   max="40"
                   value={formData.packageTotalSessions}
                   onChange={(e) => handleFeeChange(formData.sessionFee, e.target.value)}
-                  style={{ width: '100%' }}
                 />
               </div>
 
@@ -318,7 +315,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                   step="50000"
                   value={formData.sessionFee}
                   onChange={(e) => handleFeeChange(e.target.value, formData.packageTotalSessions)}
-                  style={{ width: '100%' }}
                 />
               </div>
 
@@ -332,12 +328,11 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                   max={formData.packageTotalSessions}
                   value={formData.sessionsCompleted}
                   onChange={(e) => setFormData({ ...formData, sessionsCompleted: Number(e.target.value) })}
-                  style={{ width: '100%' }}
                 />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.3rem', color: 'var(--text-secondary)' }}>
                   شهریه کل دوره (تومان)
@@ -347,7 +342,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                   step="100000"
                   value={formData.packageFee}
                   onChange={(e) => setFormData({ ...formData, packageFee: Number(e.target.value) })}
-                  style={{ width: '100%' }}
                 />
               </div>
 
@@ -360,7 +354,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                   step="100000"
                   value={formData.paidAmount}
                   onChange={(e) => setFormData({ ...formData, paidAmount: Number(e.target.value) })}
-                  style={{ width: '100%' }}
                 />
               </div>
             </div>
@@ -389,7 +382,7 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
           </div>
 
           {/* Row 4: Preferred schedule & Teacher notes */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 روز و ساعت توافق‌شده
@@ -399,7 +392,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                 value={formData.preferredDayTime}
                 onChange={(e) => setFormData({ ...formData, preferredDayTime: e.target.value })}
                 placeholder="مثال: یکشنبه‌ها ساعت ۱۶:۳۰"
-                style={{ width: '100%' }}
               />
             </div>
             <div>
@@ -411,7 +403,6 @@ export function StudentModal({ isOpen, onClose, onSave, locations, editingStuden
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="مثال: نیاز به تمرین مداوم پدال و ریز مضراب"
-                style={{ width: '100%' }}
               />
             </div>
           </div>

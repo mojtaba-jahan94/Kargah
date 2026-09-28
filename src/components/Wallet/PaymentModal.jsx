@@ -51,7 +51,7 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.25rem 1.5rem',
+          padding: '1.25rem 1.4rem',
           borderBottom: '1px solid var(--border-color)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -63,7 +63,8 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
               color: '#34d399',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
               <Wallet size={20} />
             </div>
@@ -72,7 +73,7 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
                 ثبت واریزی و تسویه حساب
               </h3>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                ثبت پرداخت شهریه، کسر از بدهی معوقه هنرجو و ثبت رسید
+                ثبت پرداخت شهریه و کسر خودکار از مانده بدهی
               </p>
             </div>
           </div>
@@ -81,7 +82,7 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.4rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
               انتخاب هنرجو *
@@ -96,7 +97,6 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
                   setAmount(s.debtAmount);
                 }
               }}
-              style={{ width: '100%' }}
             >
               {students.map(s => (
                 <option key={s.id} value={s.id}>
@@ -106,7 +106,7 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 مبلغ واریزی (تومان) *
@@ -117,7 +117,6 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
-                style={{ width: '100%' }}
               />
             </div>
 
@@ -129,12 +128,12 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
                 type="text"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                style={{ width: '100%', direction: 'ltr', textAlign: 'center' }}
+                style={{ direction: 'ltr', textAlign: 'center' }}
               />
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 روش پرداخت
@@ -142,7 +141,6 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
-                style={{ width: '100%' }}
               >
                 <option value="کارت به کارت">کارت به کارت</option>
                 <option value="کارتخوان آموزشگاه">کارتخوان آموزشگاه</option>
@@ -160,7 +158,7 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
                 value={referenceCode}
                 onChange={(e) => setReferenceCode(e.target.value)}
                 placeholder="مثال: TRX-88491"
-                style={{ width: '100%', direction: 'ltr' }}
+                style={{ direction: 'ltr' }}
               />
             </div>
           </div>
@@ -174,7 +172,6 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="مثال: تسویه کامل شهریه دوره تابستان"
-              style={{ width: '100%' }}
             />
           </div>
 
@@ -186,7 +183,10 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
               border: '1px solid var(--border-color)',
               fontSize: '0.82rem',
               display: 'flex',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.5rem'
             }}>
               <span style={{ color: 'var(--text-secondary)' }}>مانده بدهی پس از این پرداخت:</span>
               <span style={{ fontWeight: 700, color: (currentStudent.debtAmount - Number(amount)) <= 0 ? '#34d399' : '#fb7185' }}>

@@ -8,6 +8,7 @@ import WalletOverview from './components/Wallet/WalletOverview';
 import { StudentDetailModal } from './components/Students/StudentDetailModal';
 import { PackageRenewModal } from './components/Students/PackageRenewModal';
 import { PaymentModal } from './components/Wallet/PaymentModal';
+import { InstallPWA } from './components/Common/InstallPWA';
 
 import { 
   loadStoredData, 
@@ -26,7 +27,7 @@ export default function App() {
   const [selectedLocationFilter, setSelectedLocationFilter] = useState('all');
 
   // Modals controlled from App level
-  const [selectedStudentForDetail, setSelectedStudentForDetail] = useState(null);
+  const [selectedStudentForDetailId, setSelectedStudentForDetailId] = useState(null);
   const [selectedStudentForRenew, setSelectedStudentForRenew] = useState(null);
   const [selectedStudentForPayment, setSelectedStudentForPayment] = useState(null);
 
@@ -48,6 +49,11 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Scroll to top on tab switch
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
+
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
@@ -67,7 +73,6 @@ export default function App() {
     setData(prev => ({
       ...prev,
       locations: prev.locations.filter(l => l.id !== locationId),
-      // update students of that location if needed
       students: prev.students.map(s => 
         s.locationId === locationId ? { ...s, locationId: prev.locations[0]?.id || '' } : s
       )
@@ -170,10 +175,6 @@ export default function App() {
         const record = records.find(r => r.studentId === student.id);
         if (!record) return student;
 
-        // Auto-deduction rule:
-        // 'present' => deduct 1 session
-        // 'absent' => deduct 1 session (unexcused)
-        // 'excused' => do NOT deduct (excused cancellation, preserve class for makeup)
         let increment = 0;
         if (record.status === 'present' || record.status === 'absent') {
           increment = 1;
@@ -228,6 +229,11 @@ export default function App() {
 
   const globalStats = calculateGlobalStats(data.locations, data.students);
 
+  // Sync active detail student with updated data
+  const currentDetailStudent = selectedStudentForDetailId
+    ? data.students.find(s => s.id === selectedStudentForDetailId)
+    : null;
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar
@@ -242,13 +248,15 @@ export default function App() {
       />
 
       <main style={{ maxWidth: '1440px', width: '100%', margin: '0 auto', padding: '1.5rem', flex: 1 }}>
+        <InstallPWA />
+
         {activeTab === 'dashboard' && (
           <DashboardOverview
             locations={data.locations}
             students={data.students}
             payments={data.payments}
             onNavigateTab={setActiveTab}
-            onSelectStudent={(s) => setSelectedStudentForDetail(s)}
+            onSelectStudent={(s) => setSelectedStudentForDetailId(s.id)}
             onQuickAttendance={(s) => setActiveTab('attendance')}
           />
         )}
@@ -301,26 +309,23 @@ export default function App() {
       </main>
 
       {/* Global Modals for Cross-view Actions */}
-      {selectedStudentForDetail && (
+      {currentDetailStudent && (
         <StudentDetailModal
-          isOpen={!!selectedStudentForDetail}
-          onClose={() => setSelectedStudentForDetail(null)}
-          student={selectedStudentForDetail}
-          location={data.locations.find(l => l.id === selectedStudentForDetail.locationId)}
-          onUpdateStudent={(updated) => {
-            handleUpdateStudent(updated);
-            setSelectedStudentForDetail(updated);
-          }}
+          isOpen={!!currentDetailStudent}
+          onClose={() => setSelectedStudentForDetailId(null)}
+          student={currentDetailStudent}
+          location={data.locations.find(l => l.id === currentDetailStudent.locationId)}
+          onUpdateStudent={handleUpdateStudent}
           onOpenRenewModal={(s) => {
-            setSelectedStudentForDetail(null);
+            setSelectedStudentForDetailId(null);
             setSelectedStudentForRenew(s);
           }}
           onOpenPaymentModal={(s) => {
-            setSelectedStudentForDetail(null);
+            setSelectedStudentForDetailId(null);
             setSelectedStudentForPayment(s);
           }}
           onRecordQuickAttendance={(s) => {
-            setSelectedStudentForDetail(null);
+            setSelectedStudentForDetailId(null);
             setActiveTab('attendance');
           }}
         />

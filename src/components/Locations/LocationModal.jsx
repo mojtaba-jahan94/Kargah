@@ -104,7 +104,8 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
               color: 'var(--accent-gold)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
               <MapPin size={20} />
             </div>
@@ -123,9 +124,9 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
           {/* Name & Type */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 عنوان موقعیت / آموزشگاه *
@@ -136,7 +137,6 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="مثال: آموزشگاه موسیقی باربد یا شاگرد خصوصی"
                 required
-                style={{ width: '100%' }}
               />
             </div>
 
@@ -158,7 +158,6 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                   }
                   setFormData({ ...formData, type: newType, financialModel: newModel, academySharePercent: newShare });
                 }}
-                style={{ width: '100%' }}
               >
                 <option value="academy">آموزشگاه رسمی (سهم درصدی)</option>
                 <option value="private">شاگرد خصوصی (حضوری / آنلاین - بدون سهم)</option>
@@ -178,12 +177,13 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
               مدل مالی و تقسیم درآمد
             </label>
 
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, financialModel: 'percentage' })}
                 style={{
                   flex: 1,
+                  minWidth: '160px',
                   padding: '0.65rem',
                   borderRadius: '8px',
                   border: formData.financialModel === 'percentage' ? '1px solid var(--accent-amber)' : '1px solid var(--border-color)',
@@ -193,7 +193,7 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.5rem',
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   fontWeight: 600
                 }}
               >
@@ -206,6 +206,7 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                 onClick={() => setFormData({ ...formData, financialModel: 'studio_rent' })}
                 style={{
                   flex: 1,
+                  minWidth: '160px',
                   padding: '0.65rem',
                   borderRadius: '8px',
                   border: formData.financialModel === 'studio_rent' ? '1px solid var(--accent-amber)' : '1px solid var(--border-color)',
@@ -215,7 +216,7 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.5rem',
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   fontWeight: 600
                 }}
               >
@@ -225,7 +226,7 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
             </div>
 
             {formData.financialModel === 'percentage' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-secondary)' }}>
                     درصد سهم آموزشگاه
@@ -237,7 +238,7 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                       max="100"
                       value={formData.academySharePercent}
                       onChange={(e) => setFormData({ ...formData, academySharePercent: e.target.value })}
-                      style={{ width: '100%', paddingLeft: '2.5rem' }}
+                      style={{ paddingLeft: '2.5rem' }}
                     />
                     <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>٪</span>
                   </div>
@@ -270,14 +271,13 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                   value={formData.studioRentPerSession}
                   onChange={(e) => setFormData({ ...formData, studioRentPerSession: e.target.value })}
                   placeholder="مثال: ۱۵۰,۰۰۰"
-                  style={{ width: '100%' }}
                 />
               </div>
             )}
           </div>
 
           {/* Pricing defaults */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
                 شهریه پیش‌فرض هر جلسه (تومان)
@@ -287,7 +287,6 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                 step="50000"
                 value={formData.defaultSessionPrice}
                 onChange={(e) => setFormData({ ...formData, defaultSessionPrice: e.target.value })}
-                style={{ width: '100%' }}
               />
             </div>
             <div>
@@ -300,7 +299,6 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                 max="36"
                 value={formData.defaultPackageSessions}
                 onChange={(e) => setFormData({ ...formData, defaultPackageSessions: e.target.value })}
-                style={{ width: '100%' }}
               />
             </div>
           </div>
@@ -314,15 +312,15 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            fontSize: '0.85rem',
+            fontSize: '0.82rem',
             flexWrap: 'wrap',
             gap: '0.5rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#c4b5fd' }}>
               <Sparkles size={16} />
-              <span>پیش‌نمایش یک بسته {toPersianDigits(formData.defaultPackageSessions)} جلسه‌ای:</span>
+              <span>پیش‌نمایش بسته {toPersianDigits(formData.defaultPackageSessions)} جلسه‌ای:</span>
             </div>
-            <div style={{ display: 'flex', gap: '1rem', fontWeight: 600 }}>
+            <div style={{ display: 'flex', gap: '0.75rem', fontWeight: 600, flexWrap: 'wrap' }}>
               <span style={{ color: 'var(--text-secondary)' }}>
                 کل: {formatToman(sampleGross)}
               </span>
@@ -336,17 +334,16 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
           </div>
 
           {/* Address & Contact */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
-                آدرس یا لینک پلتفرم
+                آدرس یا بستر آنلاین
               </label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="آدرس فیزیکی یا آدرس پلتفرم آنلاین"
-                style={{ width: '100%' }}
+                placeholder="آدرس فیزیکی یا لینک پلتفرم"
               />
             </div>
             <div>
@@ -358,7 +355,6 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                 value={formData.contact}
                 onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                 placeholder="مثال: ۰۲۱-۸۸۸۸۸۸۸۸ (خانم احمدی)"
-                style={{ width: '100%' }}
               />
             </div>
           </div>
@@ -374,8 +370,8 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
                   key={c}
                   onClick={() => setFormData({ ...formData, color: c })}
                   style={{
-                    width: '30px',
-                    height: '30px',
+                    width: '32px',
+                    height: '32px',
                     borderRadius: '8px',
                     backgroundColor: c,
                     cursor: 'pointer',

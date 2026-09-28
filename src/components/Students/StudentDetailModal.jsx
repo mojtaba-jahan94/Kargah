@@ -86,38 +86,39 @@ export function StudentDetailModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '820px', minHeight: '620px' }}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '820px', minHeight: '600px' }}>
         {/* Header Profile Bar */}
         <div style={{
-          padding: '1.4rem 1.6rem',
+          padding: '1.25rem 1.4rem',
           borderBottom: '1px solid var(--border-color)',
           background: 'linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, transparent 100%)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          gap: '1rem',
+          gap: '0.85rem',
           flexWrap: 'wrap'
         }}>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
             <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '16px',
+              width: '50px',
+              height: '50px',
+              borderRadius: '14px',
               background: 'linear-gradient(135deg, #f59e0b, #8b5cf6)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.5rem',
+              fontSize: '1.4rem',
               color: '#fff',
               fontWeight: 800,
-              boxShadow: '0 6px 16px rgba(245, 158, 11, 0.3)'
+              boxShadow: '0 6px 16px rgba(245, 158, 11, 0.3)',
+              flexShrink: 0
             }}>
               {student.name.slice(0, 1)}
             </div>
 
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>{student.name}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{student.name}</h2>
                 <span className="badge badge-amber">{student.discipline}</span>
                 <span className="badge badge-violet">{student.level}</span>
                 {location && (
@@ -128,27 +129,27 @@ export function StudentDetailModal({
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', marginTop: '0.35rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginTop: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
                 {student.phone && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Phone size={13} />
+                    <Phone size={12} />
                     {toPersianDigits(student.phone)}
                   </span>
                 )}
-                <span>شروع دوره: {toPersianDigits(student.startDate)}</span>
+                <span>شروع: {toPersianDigits(student.startDate)}</span>
                 {student.preferredDayTime && <span>زمان: {student.preferredDayTime}</span>}
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <button
               onClick={handleGenerateReminderText}
               className="btn btn-secondary"
               title="کپی متن پیام یادآوری برای هنرجو"
-              style={{ fontSize: '0.82rem', padding: '0.45rem 0.8rem' }}
+              style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', minHeight: '34px' }}
             >
-              <MessageSquare size={15} />
+              <MessageSquare size={14} />
               <span>{copiedReminder ? 'کپی شد!' : 'پیام یادآوری'}</span>
             </button>
             <button onClick={onClose} className="btn-ghost" style={{ padding: '0.4rem', borderRadius: '8px' }}>
@@ -157,19 +158,19 @@ export function StudentDetailModal({
           </div>
         </div>
 
-        {/* Dynamic Visual Session & Financial Bar */}
+        {/* Dynamic Visual Session & Financial Bar - Responsive Stack */}
         <div style={{
-          padding: '1rem 1.6rem',
+          padding: '1rem 1.4rem',
           background: 'rgba(255, 255, 255, 0.02)',
           borderBottom: '1px solid var(--border-color)',
           display: 'grid',
-          gridTemplateColumns: '1.4fr 1fr',
-          gap: '1.5rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '1rem',
           alignItems: 'center'
         }}>
           {/* Visual Session Beads */}
           <div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
               وضعیت بسته آموزشی ({toPersianDigits(student.sessionsCompleted)} از {toPersianDigits(student.packageTotalSessions)} جلسه برگزار شده):
             </div>
             <SessionCounter
@@ -188,7 +189,9 @@ export function StudentDetailModal({
             padding: '0.75rem 1rem',
             borderRadius: '12px',
             background: fin.hasDebt ? 'rgba(244, 63, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-            border: fin.hasDebt ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(16, 185, 129, 0.25)'
+            border: fin.hasDebt ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(16, 185, 129, 0.25)',
+            flexWrap: 'wrap',
+            gap: '0.6rem'
           }}>
             <div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>وضعیت تسویه شهریه:</div>
@@ -201,18 +204,18 @@ export function StudentDetailModal({
               <button
                 onClick={() => onOpenRenewModal(student)}
                 className="btn btn-primary"
-                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                style={{ padding: '0.35rem 0.7rem', fontSize: '0.78rem', minHeight: '34px' }}
               >
-                <RefreshCw size={14} />
+                <RefreshCw size={13} />
                 <span>تمدید دوره</span>
               </button>
               {fin.hasDebt && (
                 <button
                   onClick={() => onOpenPaymentModal(student)}
                   className="btn btn-success"
-                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                  style={{ padding: '0.35rem 0.7rem', fontSize: '0.78rem', minHeight: '34px' }}
                 >
-                  <Wallet size={14} />
+                  <Wallet size={13} />
                   <span>تسویه</span>
                 </button>
               )}
@@ -224,8 +227,9 @@ export function StudentDetailModal({
         <div style={{
           display: 'flex',
           borderBottom: '1px solid var(--border-color)',
-          padding: '0 1.6rem',
-          background: 'rgba(0, 0, 0, 0.1)'
+          padding: '0 1rem',
+          background: 'rgba(0, 0, 0, 0.1)',
+          overflowX: 'auto'
         }}>
           {[
             { id: 'assignments', label: 'تکالیف و تمرین‌ها', icon: BookOpen, count: assignments.length },
@@ -241,16 +245,16 @@ export function StudentDetailModal({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.9rem 1.25rem',
+                  gap: '0.45rem',
+                  padding: '0.85rem 1rem',
                   borderBottom: isActive ? '2px solid var(--accent-amber)' : '2px solid transparent',
                   color: isActive ? 'var(--accent-gold)' : 'var(--text-secondary)',
                   fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.9rem',
-                  background: 'none'
+                  fontSize: '0.88rem',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                <Icon size={17} />
+                <Icon size={16} />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span style={{
@@ -268,18 +272,18 @@ export function StudentDetailModal({
         </div>
 
         {/* Tab Contents */}
-        <div style={{ padding: '1.5rem 1.6rem', maxHeight: '52vh', overflowY: 'auto' }}>
+        <div style={{ padding: '1.25rem 1.4rem', maxHeight: '55vh', overflowY: 'auto' }}>
           {/* TAB 1: Assignments & Practice */}
           {activeTab === 'assignments' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  تاریخچه قطعات، اتودها و تکالیف تعیین‌شده توسط استاد به همراه وضعیت اجرا
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                  تاریخچه قطعات، اتودها و تکالیف تعیین‌شده توسط استاد
                 </p>
                 <button
                   onClick={() => setIsAssignmentModalOpen(true)}
                   className="btn btn-primary"
-                  style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem' }}
+                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', minHeight: '34px' }}
                 >
                   <Plus size={15} />
                   <span>ثبت تکلیف جدید</span>
@@ -306,7 +310,7 @@ export function StudentDetailModal({
                       <div
                         key={asg.id}
                         style={{
-                          padding: '1.1rem',
+                          padding: '1rem',
                           background: 'rgba(255, 255, 255, 0.03)',
                           border: '1px solid var(--border-color)',
                           borderRadius: '12px',
@@ -315,9 +319,9 @@ export function StudentDetailModal({
                           gap: '0.65rem'
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', flexWrap: 'wrap' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <h4 style={{ fontSize: '1rem', fontWeight: 700 }}>{asg.title}</h4>
+                            <h4 style={{ fontSize: '0.98rem', fontWeight: 700 }}>{asg.title}</h4>
                             <span style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -348,7 +352,7 @@ export function StudentDetailModal({
 
                         {asg.teacherNote && (
                           <div style={{
-                            padding: '0.55rem 0.85rem',
+                            padding: '0.5rem 0.8rem',
                             background: 'rgba(245, 158, 11, 0.08)',
                             borderRight: '3px solid var(--accent-amber)',
                             borderRadius: '4px',
@@ -365,27 +369,28 @@ export function StudentDetailModal({
                           alignItems: 'center',
                           gap: '0.4rem',
                           paddingTop: '0.5rem',
-                          borderTop: '1px solid var(--border-color)'
+                          borderTop: '1px solid var(--border-color)',
+                          flexWrap: 'wrap'
                         }}>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>تغییر وضعیت:</span>
                           <button
                             onClick={() => handleUpdateAssignmentStatus(asg.id, 'completed')}
                             className="btn btn-ghost"
-                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', color: '#34d399' }}
+                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', color: '#34d399', minHeight: '30px' }}
                           >
                             تایید و تکمیل
                           </button>
                           <button
                             onClick={() => handleUpdateAssignmentStatus(asg.id, 'in_progress')}
                             className="btn btn-ghost"
-                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', color: '#fbbf24' }}
+                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', color: '#fbbf24', minHeight: '30px' }}
                           >
                             در حال تمرین
                           </button>
                           <button
                             onClick={() => handleUpdateAssignmentStatus(asg.id, 'needs_repeat')}
                             className="btn btn-ghost"
-                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', color: '#fb7185' }}
+                            style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', color: '#fb7185', minHeight: '30px' }}
                           >
                             نیاز به تکرار
                           </button>
@@ -401,14 +406,14 @@ export function StudentDetailModal({
           {/* TAB 2: Attendance & Session History */}
           {activeTab === 'attendance' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                   سوابق حضور و غیاب در این بسته و جلسات قبلی
                 </p>
                 <button
                   onClick={() => onRecordQuickAttendance(student)}
                   className="btn btn-primary"
-                  style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem' }}
+                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', minHeight: '34px' }}
                 >
                   <Plus size={15} />
                   <span>ثبت جلسه جدید</span>
@@ -435,24 +440,24 @@ export function StudentDetailModal({
                       <div
                         key={att.id || idx}
                         style={{
-                          padding: '0.85rem 1rem',
+                          padding: '0.8rem 1rem',
                           background: 'rgba(255, 255, 255, 0.03)',
                           border: '1px solid var(--border-color)',
                           borderRadius: '10px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          gap: '1rem',
+                          gap: '0.75rem',
                           flexWrap: 'wrap'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
                           <span style={{
-                            padding: '0.25rem 0.65rem',
+                            padding: '0.2rem 0.55rem',
                             borderRadius: '8px',
                             background: 'rgba(255, 255, 255, 0.06)',
                             fontWeight: 700,
-                            fontSize: '0.85rem'
+                            fontSize: '0.82rem'
                           }}>
                             جلسه {toPersianDigits(att.sessionIndex)}
                           </span>
@@ -465,21 +470,21 @@ export function StudentDetailModal({
                             borderRadius: '6px',
                             background: statusTag.bg,
                             color: statusTag.color,
-                            fontSize: '0.78rem',
+                            fontSize: '0.76rem',
                             fontWeight: 600
                           }}>
-                            <StatusIcon size={14} />
+                            <StatusIcon size={13} />
                             {statusTag.label}
                           </span>
 
                           {att.note && (
-                            <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                               {att.note}
                             </span>
                           )}
                         </div>
 
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                           {formatJalaliReadable(att.date)}
                         </div>
                       </div>
@@ -495,8 +500,8 @@ export function StudentDetailModal({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '0.85rem'
               }}>
                 <div style={{
                   padding: '1rem',
@@ -505,7 +510,7 @@ export function StudentDetailModal({
                   borderRadius: '12px'
                 }}>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>شهریه کل دوره فعلی:</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, marginTop: '0.25rem' }}>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 800, marginTop: '0.25rem' }}>
                     {formatToman(student.packageFee)}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
@@ -520,7 +525,7 @@ export function StudentDetailModal({
                   borderRadius: '12px'
                 }}>
                   <div style={{ fontSize: '0.78rem', color: '#34d399' }}>مبلغ واریز شده:</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#34d399', marginTop: '0.25rem' }}>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#34d399', marginTop: '0.25rem' }}>
                     {formatToman(student.paidAmount)}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
@@ -537,7 +542,7 @@ export function StudentDetailModal({
                   <div style={{ fontSize: '0.78rem', color: fin.hasDebt ? '#fb7185' : 'var(--text-secondary)' }}>
                     مانده بدهی معوقه:
                   </div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: fin.hasDebt ? '#fb7185' : 'var(--text-primary)', marginTop: '0.25rem' }}>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: fin.hasDebt ? '#fb7185' : 'var(--text-primary)', marginTop: '0.25rem' }}>
                     {formatToman(fin.debt)}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
@@ -565,23 +570,23 @@ export function StudentDetailModal({
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.65rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => onOpenPaymentModal(student)}
                     className="btn btn-secondary"
-                    style={{ fontSize: '0.85rem' }}
+                    style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem' }}
                   >
-                    <Wallet size={16} />
-                    <span>ثبت واریزی هنرجو</span>
+                    <Wallet size={15} />
+                    <span>ثبت واریزی</span>
                   </button>
 
                   <button
                     onClick={() => onOpenRenewModal(student)}
                     className="btn btn-primary"
-                    style={{ fontSize: '0.85rem' }}
+                    style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem' }}
                   >
-                    <RefreshCw size={16} />
-                    <span>تمدید بسته آموزشی جدید</span>
+                    <RefreshCw size={15} />
+                    <span>تمدید دوره جدید</span>
                   </button>
                 </div>
               </div>
