@@ -20,34 +20,27 @@
     </filter>
   </defs>
 
-  <!-- Background Card -->
   <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
   <rect width="512" height="512" rx="128" stroke="url(#goldGrad)" stroke-width="8" stroke-opacity="0.4" />
 
-  <!-- Artist Palette Outer Ring / Glow -->
   <circle cx="256" cy="256" r="160" fill="none" stroke="url(#goldGrad)" stroke-width="2" stroke-dasharray="8 8" opacity="0.4" />
 
-  <!-- Palette Body -->
   <path d="M256 120 C180 120, 130 170, 130 240 C130 310, 180 370, 240 370 C265 370, 280 355, 295 345 C305 338, 315 335, 330 338 C355 342, 382 325, 382 290 C382 250, 360 230, 360 210 C360 160, 315 120, 256 120 Z" 
         fill="url(#purpleGrad)" 
         filter="url(#glow)" 
         opacity="0.9" />
 
-  <!-- Palette Thumb Hole -->
   <ellipse cx="320" cy="285" rx="22" ry="26" fill="#0b0f19" />
 
-  <!-- Paint Color Blobs -->
   <circle cx="200" cy="180" r="20" fill="#f59e0b" filter="url(#glow)" />
   <circle cx="260" cy="165" r="18" fill="#10b981" filter="url(#glow)" />
   <circle cx="315" cy="185" r="17" fill="#06b6d4" filter="url(#glow)" />
   <circle cx="180" cy="240" r="19" fill="#f43f5e" filter="url(#glow)" />
   <circle cx="205" cy="305" r="18" fill="#fbbf24" filter="url(#glow)" />
 
-  <!-- Art Brush Cross -->
   <path d="M380 140 L285 235 L270 230 L265 245 L360 125 C368 117, 385 120, 388 128 C390 132, 385 137, 380 140 Z" fill="url(#goldGrad)" />
   <path d="M265 245 L250 270 C246 276, 252 282, 258 278 L270 250 Z" fill="#d97706" />
 
-  <!-- Music Clef / Artistic Flourish Accent -->
   <circle cx="350" cy="380" r="6" fill="#f59e0b" opacity="0.8" />
   <circle cx="375" cy="365" r="4" fill="#a78bfa" opacity="0.8" />
   <circle cx="390" cy="390" r="5" fill="#10b981" opacity="0.8" />
