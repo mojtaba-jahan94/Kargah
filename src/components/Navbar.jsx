@@ -15,6 +15,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { toPersianDigits } from '../utils/jalali';
+import { StorageModeSelector } from './Auth/StorageModeSelector';
 
 export default function Navbar({ 
   activeTab, 
@@ -24,7 +25,9 @@ export default function Navbar({
   stats, 
   onExport, 
   onImport, 
-  onReset 
+  onReset,
+  currentAppData,
+  onApplyServerData
 }) {
   const fileInputRef = useRef(null);
 
@@ -212,6 +215,12 @@ export default function Navbar({
 
           {/* Quick Utility Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+            {/* Storage Mode & Auth Switcher */}
+            <StorageModeSelector 
+              currentAppData={currentAppData} 
+              onApplyServerData={onApplyServerData} 
+            />
+
             {/* Backup / Export */}
             <button
               onClick={onExport}

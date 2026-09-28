@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import DashboardOverview from './components/Dashboard/DashboardOverview';
 import LocationList from './components/Locations/LocationList';
@@ -9,6 +9,8 @@ import { StudentDetailModal } from './components/Students/StudentDetailModal';
 import { PackageRenewModal } from './components/Students/PackageRenewModal';
 import { PaymentModal } from './components/Wallet/PaymentModal';
 import { InstallPWA } from './components/Common/InstallPWA';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthModal } from './components/Auth/AuthModal';
 
 import { 
   loadStoredData, 
@@ -20,7 +22,7 @@ import {
 } from './data/storage';
 import { calculateGlobalStats } from './utils/finance';
 
-export default function App() {
+function AppContent({ setAppBridge }) {
   const [data, setData] = useState(() => loadStoredData());
   const [activeTab, setActiveTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark');
@@ -30,6 +32,9 @@ export default function App() {
   const [selectedStudentForDetailId, setSelectedStudentForDetailId] = useState(null);
   const [selectedStudentForRenew, setSelectedStudentForRenew] = useState(null);
   const [selectedStudentForPayment, setSelectedStudentForPayment] = useState(null);
+
+  const { storageMode, pushToServer, isAuthenticated } = useAuth();
+  const isInitialMount = useRef(true);
 
   // Sync to localStorage
   useEffect(() => {
@@ -43,6 +48,41 @@ export default function App() {
   useEffect(() => {
     savePaymentsToStorage(data.payments);
   }, [data.payments]);
+
+  // Auto-sync to Turso server when in server mode and logged in
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (storageMode === 'server' && isAuthenticated) {
+      const timer = setTimeout(() => {
+        pushToServer(data);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [data, storageMode, isAuthenticated, pushToServer]);
+
+  // Handler for applying data loaded from Turso server
+  const handleApplyServerData = useCallback((serverData) => {
+    if (serverData && (serverData.locations || serverData.students)) {
+      setData(prev => ({
+        locations: serverData.locations || prev.locations,
+        students: serverData.students || prev.students,
+        payments: serverData.payments || prev.payments,
+      }));
+    }
+  }, []);
+
+  // Expose methods to parent AuthProvider
+  useEffect(() => {
+    if (setAppBridge) {
+      setAppBridge({
+        applyServerData: handleApplyServerData,
+        getData: () => data
+      });
+    }
+  }, [setAppBridge, handleApplyServerData, data]);
 
   // Sync theme
   useEffect(() => {
@@ -245,6 +285,8 @@ export default function App() {
         onExport={handleExportData}
         onImport={handleImportData}
         onReset={handleResetData}
+        currentAppData={data}
+        onApplyServerData={handleApplyServerData}
       />
 
       <main style={{ maxWidth: '1440px', width: '100%', margin: '0 auto', padding: '1.5rem', flex: 1 }}>
@@ -308,7 +350,9 @@ export default function App() {
         )}
       </main>
 
-      {/* Global Modals for Cross-view Actions */}
+      {/* Global Modals */}
+      <AuthModal />
+
       {currentDetailStudent && (
         <StudentDetailModal
           isOpen={!!currentDetailStudent}
@@ -351,5 +395,22 @@ export default function App() {
         />
       )}
     </div>
+  );
+}
+
+export default function App() {
+  const [appBridge, setAppBridge] = useState(null);
+
+  return (
+    <AuthProvider
+      onServerDataLoaded={(serverData) => {
+        if (appBridge?.applyServerData) {
+          appBridge.applyServerData(serverData);
+        }
+      }}
+      getCurrentAppState={() => (appBridge?.getData ? appBridge.getData() : loadStoredData())}
+    >
+      <AppContent setAppBridge={setAppBridge} />
+    </AuthProvider>
   );
 }
