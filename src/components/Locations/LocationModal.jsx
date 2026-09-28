@@ -3,7 +3,8 @@ import { X, MapPin, Percent, DollarSign, Building2, Home, Landmark, Sparkles } f
 import { toPersianDigits } from '../../utils/jalali';
 import { formatToman } from '../../utils/formatters';
 
-export function LocationModal({ isOpen, onClose, onSave, editingLocation = null }) {
+export function LocationModal({ isOpen, onClose, onSave, editingLocation = null, location = null }) {
+  const activeLoc = editingLocation || location;
   const [formData, setFormData] = useState({
     name: '',
     type: 'academy', // 'private', 'academy', 'studio_rent'
@@ -19,19 +20,19 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
   });
 
   useEffect(() => {
-    if (editingLocation) {
+    if (activeLoc) {
       setFormData({
-        name: editingLocation.name || '',
-        type: editingLocation.type || 'academy',
-        financialModel: editingLocation.financialModel || 'percentage',
-        academySharePercent: editingLocation.academySharePercent ?? 30,
-        studioRentPerSession: editingLocation.studioRentPerSession ?? 150000,
-        defaultSessionPrice: editingLocation.defaultSessionPrice ?? 500000,
-        defaultPackageSessions: editingLocation.defaultPackageSessions ?? 8,
-        address: editingLocation.address || '',
-        contact: editingLocation.contact || '',
-        notes: editingLocation.notes || '',
-        color: editingLocation.color || '#3b82f6',
+        name: activeLoc.name || '',
+        type: activeLoc.type || 'academy',
+        financialModel: activeLoc.financialModel || 'percentage',
+        academySharePercent: activeLoc.academySharePercent ?? (activeLoc.type === 'private' ? 0 : 30),
+        studioRentPerSession: activeLoc.studioRentPerSession ?? 150000,
+        defaultSessionPrice: activeLoc.defaultSessionPrice ?? 500000,
+        defaultPackageSessions: activeLoc.defaultPackageSessions ?? 8,
+        address: activeLoc.address || '',
+        contact: activeLoc.contact || '',
+        notes: activeLoc.notes || '',
+        color: activeLoc.color || '#3b82f6',
       });
     } else {
       setFormData({
@@ -48,7 +49,7 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
         color: '#3b82f6',
       });
     }
-  }, [editingLocation, isOpen]);
+  }, [activeLoc, isOpen]);
 
   if (!isOpen) return null;
 
@@ -61,8 +62,8 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null 
 
     const payload = {
       ...formData,
-      id: editingLocation ? editingLocation.id : `loc-${Date.now()}`,
-      academySharePercent: Number(formData.academySharePercent) || 0,
+      id: activeLoc ? activeLoc.id : `loc-${Date.now()}`,
+      academySharePercent: formData.type === 'private' ? 0 : (Number(formData.academySharePercent) || 0),
       studioRentPerSession: Number(formData.studioRentPerSession) || 0,
       defaultSessionPrice: Number(formData.defaultSessionPrice) || 0,
       defaultPackageSessions: Number(formData.defaultPackageSessions) || 8,

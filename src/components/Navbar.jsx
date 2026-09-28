@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   MapPin, 
@@ -11,7 +11,11 @@ import {
   Sun, 
   Bell, 
   Sparkles, 
-  Settings 
+  Settings,
+  Plus,
+  ChevronDown,
+  UserPlus,
+  Building2
 } from 'lucide-react';
 import { PaintingIcon } from './Common/PaintingIcon';
 import { toPersianDigits } from '../utils/jalali';
@@ -26,10 +30,28 @@ export default function Navbar({
   onExport, 
   onImport, 
   onOpenSettings,
+  onOpenAddStudent,
+  onOpenAddLocation,
   currentAppData,
   onApplyServerData
 }) {
   const fileInputRef = useRef(null);
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const addMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target)) {
+        setIsAddMenuOpen(false);
+      }
+    };
+    if (isAddMenuOpen) {
+      document.addEventListener('pointerdown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideClick);
+    };
+  }, [isAddMenuOpen]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -216,7 +238,131 @@ export default function Navbar({
           </nav>
 
           {/* Quick Utility Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+            {/* Quick Add Menu */}
+            <div style={{ position: 'relative' }} ref={addMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
+                className="btn btn-primary"
+                style={{
+                  padding: '0.4rem 0.75rem',
+                  fontSize: '0.82rem',
+                  borderRadius: '9px',
+                  gap: '0.35rem',
+                  minHeight: '32px',
+                  boxShadow: '0 2px 10px rgba(245, 158, 11, 0.25)',
+                  whiteSpace: 'nowrap'
+                }}
+                title="منوی افزودن آموزشگاه یا هنرجو"
+              >
+                <Plus size={15} />
+                <span>افزودن</span>
+                <ChevronDown size={13} style={{ transform: isAddMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+
+              {isAddMenuOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  left: 0,
+                  zIndex: 150,
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '14px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                  padding: '0.45rem',
+                  minWidth: '220px',
+                  animation: 'fadeIn 0.18s ease-out',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddMenuOpen(false);
+                      if (onOpenAddStudent) onOpenAddStudent();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      padding: '0.6rem 0.75rem',
+                      borderRadius: '9px',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      textAlign: 'right',
+                      width: '100%',
+                      transition: 'background 0.15s ease'
+                    }}
+                    className="btn-ghost"
+                  >
+                    <div style={{
+                      width: '30px',
+                      height: '30px',
+                      borderRadius: '8px',
+                      background: 'rgba(139, 92, 246, 0.15)',
+                      color: '#a78bfa',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <UserPlus size={16} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 600 }}>ثبت‌نام هنرجوی جدید</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>پرونده، بسته و شهریه</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddMenuOpen(false);
+                      if (onOpenAddLocation) onOpenAddLocation();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      padding: '0.6rem 0.75rem',
+                      borderRadius: '9px',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      textAlign: 'right',
+                      width: '100%',
+                      transition: 'background 0.15s ease'
+                    }}
+                    className="btn-ghost"
+                  >
+                    <div style={{
+                      width: '30px',
+                      height: '30px',
+                      borderRadius: '8px',
+                      background: 'rgba(245, 158, 11, 0.15)',
+                      color: 'var(--accent-gold)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Building2 size={16} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 600 }}>تعریف آموزشگاه / موقعیت</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>آموزشگاه درصدی یا خصوصی</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Storage Mode & Auth Switcher */}
             <StorageModeSelector 
               currentAppData={currentAppData} 

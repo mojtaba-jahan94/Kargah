@@ -12,6 +12,8 @@ import { InstallPWA } from './components/Common/InstallPWA';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/Auth/AuthModal';
 import { SettingsModal } from './components/Settings/SettingsModal';
+import { LocationModal } from './components/Locations/LocationModal';
+import { StudentModal } from './components/Students/StudentModal';
 import { Loader2 } from 'lucide-react';
 
 import { 
@@ -35,6 +37,8 @@ function AppContent({ setAppBridge }) {
   const [selectedStudentForRenew, setSelectedStudentForRenew] = useState(null);
   const [selectedStudentForPayment, setSelectedStudentForPayment] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isQuickStudentOpen, setIsQuickStudentOpen] = useState(false);
+  const [isQuickLocationOpen, setIsQuickLocationOpen] = useState(false);
 
   const { storageMode, pushToServer, isAuthenticated, isAuthLoading } = useAuth();
   const isInitialMount = useRef(true);
@@ -305,6 +309,8 @@ function AppContent({ setAppBridge }) {
         onExport={handleExportData}
         onImport={handleImportData}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenAddStudent={() => setIsQuickStudentOpen(true)}
+        onOpenAddLocation={() => setIsQuickLocationOpen(true)}
         currentAppData={data}
         onApplyServerData={handleApplyServerData}
       />
@@ -320,6 +326,8 @@ function AppContent({ setAppBridge }) {
             onNavigateTab={setActiveTab}
             onSelectStudent={(s) => setSelectedStudentForDetailId(s.id)}
             onQuickAttendance={(s) => setActiveTab('attendance')}
+            onOpenAddStudent={() => setIsQuickStudentOpen(true)}
+            onOpenAddLocation={() => setIsQuickLocationOpen(true)}
           />
         )}
 
@@ -341,6 +349,7 @@ function AppContent({ setAppBridge }) {
             students={data.students}
             locations={data.locations}
             onSaveStudent={handleSaveStudent}
+            onSaveLocation={handleSaveLocation}
             onDeleteStudent={handleDeleteStudent}
             onUpdateStudent={handleUpdateStudent}
             onRenewPackage={handleRenewPackage}
@@ -427,6 +436,23 @@ function AppContent({ setAppBridge }) {
           initialStudent={selectedStudentForPayment}
         />
       )}
+
+      {/* Global Quick Add Modals */}
+      <StudentModal
+        isOpen={isQuickStudentOpen}
+        onClose={() => setIsQuickStudentOpen(false)}
+        onSave={handleSaveStudent}
+        onSaveLocation={handleSaveLocation}
+        locations={data.locations}
+        editingStudent={null}
+      />
+
+      <LocationModal
+        isOpen={isQuickLocationOpen}
+        onClose={() => setIsQuickLocationOpen(false)}
+        onSave={handleSaveLocation}
+        editingLocation={null}
+      />
     </div>
   );
 }

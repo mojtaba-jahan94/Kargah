@@ -15,7 +15,8 @@ import {
   BookOpen,
   ArrowUpRight,
   ShieldAlert,
-  ChevronDown
+  ChevronDown,
+  Plus
 } from 'lucide-react';
 import { toPersianDigits, getTodayJalaliString, getTodayDayOfWeek } from '../../utils/jalali';
 import { formatToman, formatPercent } from '../../utils/formatters';
@@ -27,7 +28,9 @@ export default function DashboardOverview({
   payments, 
   onNavigateTab, 
   onSelectStudent,
-  onQuickAttendance
+  onQuickAttendance,
+  onOpenAddStudent,
+  onOpenAddLocation
 }) {
   const [isUrgentExpanded, setIsUrgentExpanded] = useState(true);
   const [isLocationExpanded, setIsLocationExpanded] = useState(true);
@@ -65,21 +68,77 @@ export default function DashboardOverview({
 
         <div className="dashboard-banner-actions">
           <button
-            onClick={() => onNavigateTab('attendance')}
+            onClick={onOpenAddStudent}
             className="btn btn-primary"
           >
-            <CalendarCheck2 size={17} />
-            <span>حضور و غیاب امروز</span>
+            <Plus size={17} />
+            <span>ثبت‌نام هنرجو</span>
           </button>
           <button
-            onClick={() => onNavigateTab('wallet')}
+            onClick={onOpenAddLocation}
             className="btn btn-secondary"
           >
-            <Wallet size={17} />
-            <span>کیف پول و تسویه</span>
+            <Building2 size={17} />
+            <span>آموزشگاه جدید</span>
+          </button>
+          <button
+            onClick={() => onNavigateTab('attendance')}
+            className="btn btn-secondary hide-on-mobile"
+          >
+            <CalendarCheck2 size={17} />
+            <span>حضور و غیاب</span>
           </button>
         </div>
       </div>
+
+      {/* Onboarding Banner when no locations or students */}
+      {locations.length === 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%)',
+          border: '1px solid rgba(245, 158, 11, 0.35)',
+          borderRadius: '16px',
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
+              background: 'rgba(245, 158, 11, 0.2)',
+              color: 'var(--accent-gold)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Sparkles size={22} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
+                شروع کار با کارگاه: تعریف اولین آموزشگاه یا کلاس
+              </h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                ابتدا موقعیت کلاس‌های خود (آموزشگاه رسمی، کلاس خصوصی یا پلاتو) را مشخص کنید، سپس هنرجویان را ثبت‌نام فرمایید.
+              </p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <button onClick={onOpenAddLocation} className="btn btn-primary" style={{ fontSize: '0.85rem' }}>
+              <Plus size={16} />
+              <span>+ افزودن آموزشگاه / موقعیت</span>
+            </button>
+            <button onClick={onOpenAddStudent} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
+              <Plus size={16} />
+              <span>+ ثبت‌نام هنرجو</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Primary KPI Row - 2x2 on Mobile, 4x1 on Desktop */}
       <div className="dashboard-kpi-grid">

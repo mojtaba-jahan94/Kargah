@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -28,6 +28,7 @@ export default function StudentList({
   students, 
   locations, 
   onSaveStudent, 
+  onSaveLocation,
   onDeleteStudent, 
   onUpdateStudent, 
   onRenewPackage,
@@ -41,8 +42,17 @@ export default function StudentList({
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'renewal', 'debt'
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
 
-  // Set of expanded card IDs (defaults to all expanded or first 2)
+  // Set of expanded card IDs (defaults to all expanded)
   const [expandedIds, setExpandedIds] = useState(() => new Set(students.map(s => s.id)));
+
+  // Automatically keep newly added students expanded
+  useEffect(() => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      students.forEach(s => next.add(s.id));
+      return next;
+    });
+  }, [students]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -97,6 +107,11 @@ export default function StudentList({
   const handleCreate = () => {
     setEditingStudent(null);
     setIsModalOpen(true);
+  };
+
+  const handleSaveStudentInternal = (studentData) => {
+    onSaveStudent(studentData);
+    setExpandedIds(prev => new Set(prev).add(studentData.id));
   };
 
   const handleDelete = (student) => {
@@ -285,7 +300,28 @@ export default function StudentList({
       </div>
 
       {/* Main Students Display */}
-      {filteredStudents.length === 0 ? (
+      {students.length === 0 ? (
+        <div style={{
+          textAlign: 'center',
+          padding: '3.5rem 1.5rem',
+          background: 'var(--bg-glass)',
+          borderRadius: '16px',
+          border: '1px dashed var(--border-color)',
+          color: 'var(--text-muted)'
+        }}>
+          <Users size={48} style={{ opacity: 0.35, marginBottom: '0.75rem', color: 'var(--accent-violet)' }} />
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
+            هنوز هیچ هنرجویی ثبت‌نام نشده است
+          </h3>
+          <p style={{ fontSize: '0.85rem', maxWidth: '440px', margin: '0 auto 1.25rem', lineHeight: 1.6 }}>
+            با ثبت‌نام هنرجو، می‌توانید جلسات بسته، تاریخچه تکالیف و وضعیت حضور و غیاب را در فضایی مرتب و متمرکز دنبال کنید.
+          </p>
+          <button onClick={handleCreate} className="btn btn-primary" style={{ margin: '0 auto' }}>
+            <Plus size={18} />
+            <span>ثبت‌نام اولین هنرجو</span>
+          </button>
+        </div>
+      ) : filteredStudents.length === 0 ? (
         <div style={{
           textAlign: 'center',
           padding: '3.5rem 1.5rem',
@@ -295,7 +331,7 @@ export default function StudentList({
           color: 'var(--text-muted)'
         }}>
           <Users size={44} style={{ opacity: 0.3, marginBottom: '0.65rem' }} />
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>هنرجویی یافت نشد</h3>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>هنرجویی با این مشخصات یافت نشد</h3>
           <p style={{ fontSize: '0.82rem', marginTop: '0.25rem' }}>با تغییر عبارت جستجو یا فیلترها دوباره تلاش کنید.</p>
         </div>
       ) : viewMode === 'grid' ? (
@@ -408,7 +444,8 @@ export default function StudentList({
       <StudentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={onSaveStudent}
+        onSave={handleSaveStudentInternal}
+        onSaveLocation={onSaveLocation}
         locations={locations}
         editingStudent={editingStudent}
       />
