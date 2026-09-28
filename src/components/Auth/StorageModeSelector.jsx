@@ -83,134 +83,134 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
   };
 
   return (
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.5rem' }} ref={menuRef}>
-      {/* Mode Switcher Pill */}
-      <div 
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          backgroundColor: 'var(--bg-card, rgba(255, 255, 255, 0.04))',
-          border: '1px solid var(--border-color)',
-          borderRadius: '9999px',
-          padding: '2px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        }}
-      >
-        {/* Local mode button */}
-        <button
-          type="button"
-          onClick={() => handleToggleMode('local')}
-          title="ذخیره محلی داده‌ها در مرورگر (آفلاین)"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.35rem 0.65rem',
-            borderRadius: '9999px',
-            fontSize: '0.78rem',
-            fontWeight: storageMode === 'local' ? 600 : 400,
-            border: 'none',
-            cursor: 'pointer',
-            backgroundColor: storageMode === 'local' 
-              ? 'rgba(16, 185, 129, 0.18)' 
-              : 'transparent',
-            color: storageMode === 'local' 
-              ? 'var(--accent-green, #10b981)' 
-              : 'var(--text-muted)',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <HardDrive size={13} />
-          <span>مرورگر</span>
-        </button>
-
-        {/* Server mode button */}
-        <button
-          type="button"
-          onClick={() => handleToggleMode('server')}
-          title={isAuthenticated ? 'ذخیره ابری روی سرور ورسل و دیتابیس Turso' : 'ورود و فعال‌سازی ذخیره روی سرور'}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.35rem 0.65rem',
-            borderRadius: '9999px',
-            fontSize: '0.78rem',
-            fontWeight: storageMode === 'server' ? 600 : 400,
-            border: 'none',
-            cursor: 'pointer',
-            backgroundColor: storageMode === 'server' 
-              ? 'rgba(168, 85, 247, 0.2)' 
-              : 'transparent',
-            color: storageMode === 'server' 
-              ? 'var(--accent-purple, #a855f7)' 
-              : 'var(--text-muted)',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <Cloud size={13} />
-          <span>سرور (Turso)</span>
-        </button>
-      </div>
-
-      {/* Sync Action Button (Visible when in server mode or logged in) */}
-      {isAuthenticated && (
-        <button
-          type="button"
-          onClick={handlePushToServer}
-          disabled={syncStatus === 'syncing'}
-          title="همگام‌سازی و ذخیره آنی در سرور Turso"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--bg-card, rgba(255, 255, 255, 0.05))',
-            border: '1px solid var(--border-color)',
-            color: syncStatus === 'error' ? '#ef4444' : syncStatus === 'synced' ? '#10b981' : 'var(--text-secondary)',
-            cursor: syncStatus === 'syncing' ? 'wait' : 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          {syncStatus === 'syncing' ? (
-            <RefreshCw size={14} className="spin-animation" />
-          ) : syncStatus === 'synced' ? (
-            <Check size={14} />
-          ) : syncStatus === 'error' ? (
-            <AlertCircle size={14} />
-          ) : (
-            <RefreshCw size={14} />
-          )}
-        </button>
-      )}
-
-      {/* User Button / Modal Trigger */}
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.4rem' }} ref={menuRef}>
       {!isAuthenticated ? (
         <button
           type="button"
           onClick={openAuthModal}
+          title="ورود به حساب کاربری و فعال‌سازی ذخیره ابری"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.4rem',
+            gap: '0.35rem',
             padding: '0.4rem 0.75rem',
             backgroundColor: 'rgba(168, 85, 247, 0.15)',
             border: '1px solid rgba(168, 85, 247, 0.35)',
-            borderRadius: '8px',
+            borderRadius: '10px',
             color: 'var(--accent-purple, #a855f7)',
-            fontSize: '0.82rem',
+            fontSize: '0.8rem',
             fontWeight: 600,
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            whiteSpace: 'nowrap',
+            transition: 'all 0.2s ease',
           }}
         >
-          <User size={14} />
-          <span>ورود / اتصال به سرور</span>
+          <Cloud size={14} />
+          <span>ورود / ابری</span>
         </button>
       ) : (
-        <div style={{ position: 'relative' }}>
+        <>
+          {/* Mode Switcher Pill */}
+          <div 
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              backgroundColor: 'var(--bg-card, rgba(255, 255, 255, 0.04))',
+              border: '1px solid var(--border-color)',
+              borderRadius: '9999px',
+              padding: '2px',
+            }}
+          >
+            {/* Local mode button */}
+            <button
+              type="button"
+              onClick={() => handleToggleMode('local')}
+              title="ذخیره محلی داده‌ها در مرورگر (آفلاین)"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                padding: '0.3rem 0.55rem',
+                borderRadius: '9999px',
+                fontSize: '0.75rem',
+                fontWeight: storageMode === 'local' ? 600 : 400,
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: storageMode === 'local' 
+                  ? 'rgba(16, 185, 129, 0.18)' 
+                  : 'transparent',
+                color: storageMode === 'local' 
+                  ? 'var(--accent-green, #10b981)' 
+                  : 'var(--text-muted)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <HardDrive size={12} />
+              <span>محلی</span>
+            </button>
+
+            {/* Server mode button */}
+            <button
+              type="button"
+              onClick={() => handleToggleMode('server')}
+              title="ذخیره ابری روی سرور"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                padding: '0.3rem 0.55rem',
+                borderRadius: '9999px',
+                fontSize: '0.75rem',
+                fontWeight: storageMode === 'server' ? 600 : 400,
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: storageMode === 'server' 
+                  ? 'rgba(168, 85, 247, 0.2)' 
+                  : 'transparent',
+                color: storageMode === 'server' 
+                  ? 'var(--accent-purple, #a855f7)' 
+                  : 'var(--text-muted)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Cloud size={12} />
+              <span>ابری</span>
+            </button>
+          </div>
+
+          {/* Sync Action Button */}
+          <button
+            type="button"
+            onClick={handlePushToServer}
+            disabled={syncStatus === 'syncing'}
+            title="همگام‌سازی و ذخیره آنی در سرور"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '30px',
+              height: '30px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--bg-card, rgba(255, 255, 255, 0.05))',
+              border: '1px solid var(--border-color)',
+              color: syncStatus === 'error' ? '#ef4444' : syncStatus === 'synced' ? '#10b981' : 'var(--text-secondary)',
+              cursor: syncStatus === 'syncing' ? 'wait' : 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {syncStatus === 'syncing' ? (
+              <RefreshCw size={13} className="spin-animation" />
+            ) : syncStatus === 'synced' ? (
+              <Check size={13} />
+            ) : syncStatus === 'error' ? (
+              <AlertCircle size={13} />
+            ) : (
+              <RefreshCw size={13} />
+            )}
+          </button>
+
+          {/* User Menu Trigger */}
+          <div style={{ position: 'relative' }}>
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
@@ -416,7 +416,8 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
             </div>
           )}
         </div>
-      )}
-    </div>
+      </>
+    )}
+  </div>
   );
 }

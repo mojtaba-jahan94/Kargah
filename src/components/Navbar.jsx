@@ -151,13 +151,13 @@ export default function Navbar({
 
           {/* Desktop Navigation Tabs */}
           <nav className="desktop-nav" style={{
+            display: 'flex',
             alignItems: 'center',
-            gap: '0.35rem',
-            background: 'rgba(0, 0, 0, 0.2)',
-            padding: '0.3rem',
-            borderRadius: '14px',
+            gap: '0.25rem',
+            background: 'rgba(0, 0, 0, 0.22)',
+            padding: '0.25rem 0.35rem',
+            borderRadius: '12px',
             border: '1px solid var(--border-color)',
-            overflowX: 'auto'
           }}>
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -166,39 +166,42 @@ export default function Navbar({
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
+                  title={item.fullLabel}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.45rem',
-                    padding: '0.55rem 0.95rem',
-                    borderRadius: '10px',
-                    fontSize: '0.88rem',
-                    fontWeight: isActive ? 600 : 400,
+                    gap: '0.35rem',
+                    padding: '0.45rem 0.75rem',
+                    borderRadius: '8px',
+                    fontSize: '0.84rem',
+                    fontWeight: isActive ? 600 : 500,
                     color: isActive ? '#fff' : 'var(--text-secondary)',
                     background: isActive ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(139, 92, 246, 0.25))' : 'transparent',
                     border: isActive ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid transparent',
-                    boxShadow: isActive ? '0 2px 8px rgba(0,0,0,0.2)' : 'none',
+                    boxShadow: isActive ? '0 2px 6px rgba(0,0,0,0.2)' : 'none',
                     whiteSpace: 'nowrap',
+                    cursor: 'pointer',
                     transition: 'all 0.18s ease'
                   }}
                 >
-                  <Icon size={17} color={isActive ? 'var(--accent-gold)' : 'currentColor'} />
-                  <span>{item.fullLabel}</span>
+                  <Icon size={16} color={isActive ? 'var(--accent-gold)' : 'currentColor'} />
+                  <span>{item.label}</span>
                   {item.badge && (
                     <span style={{
-                      fontSize: '0.72rem',
-                      padding: '0.1rem 0.4rem',
+                      fontSize: '0.7rem',
+                      padding: '0.05rem 0.35rem',
                       borderRadius: '999px',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      color: 'var(--text-primary)'
+                      background: 'rgba(255, 255, 255, 0.12)',
+                      color: 'var(--text-primary)',
+                      fontWeight: 600
                     }}>
                       {item.badge}
                     </span>
                   )}
                   {item.alertCount && (
                     <span style={{
-                      fontSize: '0.72rem',
-                      padding: '0.1rem 0.45rem',
+                      fontSize: '0.7rem',
+                      padding: '0.05rem 0.4rem',
                       borderRadius: '999px',
                       background: 'var(--accent-rose)',
                       color: '#fff',
@@ -214,7 +217,7 @@ export default function Navbar({
           </nav>
 
           {/* Quick Utility Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
             {/* Storage Mode & Auth Switcher */}
             <StorageModeSelector 
               currentAppData={currentAppData} 
@@ -226,10 +229,9 @@ export default function Navbar({
               onClick={onExport}
               className="btn btn-secondary"
               title="پشتیبان‌گیری از اطلاعات (Export JSON)"
-              style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', minHeight: '36px' }}
+              style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Download size={15} />
-              <span className="hide-on-mobile">پشتیبان</span>
+              <Download size={14} />
             </button>
 
             {/* Import */}
@@ -237,10 +239,9 @@ export default function Navbar({
               onClick={() => fileInputRef.current?.click()}
               className="btn btn-secondary"
               title="بازیابی اطلاعات از فایل (Import JSON)"
-              style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', minHeight: '36px' }}
+              style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <Upload size={15} />
-              <span className="hide-on-mobile">بازیابی</span>
+              <Upload size={14} />
             </button>
             <input 
               type="file" 
@@ -255,9 +256,9 @@ export default function Navbar({
               onClick={onReset}
               className="btn btn-ghost"
               title="بازنشانی داده‌های اولیه دمو"
-              style={{ padding: '0.45rem', borderRadius: '8px', minHeight: '36px' }}
+              style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <RotateCcw size={16} />
+              <RotateCcw size={14} />
             </button>
 
             {/* Theme Toggle */}
@@ -265,9 +266,9 @@ export default function Navbar({
               onClick={toggleTheme}
               className="btn btn-secondary"
               title={theme === 'dark' ? 'حالت روز' : 'حالت شب'}
-              style={{ padding: '0.45rem', borderRadius: '8px', minHeight: '36px' }}
+              style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              {theme === 'dark' ? <Sun size={16} color="var(--accent-gold)" /> : <Moon size={16} />}
+              {theme === 'dark' ? <Sun size={14} color="var(--accent-gold)" /> : <Moon size={14} />}
             </button>
           </div>
         </div>

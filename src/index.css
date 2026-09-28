@@ -332,6 +332,15 @@ input:focus, select:focus, textarea:focus {
 .hide-on-mobile {
   display: inline;
 }
+.hide-on-tablet {
+  display: inline;
+}
+
+@media (max-width: 1024px) {
+  .hide-on-tablet {
+    display: none !important;
+  }
+}
 
 /* Mobile Screens (Phone & Small Tablets) */
 @media (max-width: 768px) {
