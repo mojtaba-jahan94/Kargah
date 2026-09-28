@@ -67,13 +67,11 @@ export default async function handler(req, res) {
     const locationsJson = JSON.stringify(initialData?.locations || []);
     const studentsJson = JSON.stringify(initialData?.students || []);
     const paymentsJson = JSON.stringify(initialData?.payments || []);
-    const settingsJson = JSON.stringify(initialData?.settings || {});
 
     await saveUserData(userId, {
       locationsJson,
       studentsJson,
       paymentsJson,
-      settingsJson,
       updatedAt: nowIso
     });
 

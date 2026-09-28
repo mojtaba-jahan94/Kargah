@@ -233,7 +233,7 @@ export async function getUserData(userId) {
   }
 }
 
-export async function saveUserData(userId, { locationsJson, studentsJson, paymentsJson, settingsJson, updatedAt }) {
+export async function saveUserData(userId, { locationsJson, studentsJson, paymentsJson, settingsJson = '', updatedAt }) {
   const db = getDatabase();
   if (!db) throw new Error('Database not configured');
 

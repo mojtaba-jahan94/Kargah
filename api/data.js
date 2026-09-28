@@ -42,7 +42,6 @@ export default async function handler(req, res) {
           locations: null,
           students: null,
           payments: null,
-          settings: null,
           updatedAt: null,
           message: 'هنوز داده‌ای روی سرور برای این حساب ثبت نشده است.'
         });
@@ -53,7 +52,6 @@ export default async function handler(req, res) {
         locations: JSON.parse(row.locations_json || '[]'),
         students: JSON.parse(row.students_json || '[]'),
         payments: JSON.parse(row.payments_json || '[]'),
-        settings: JSON.parse(row.settings_json || '{}'),
         updatedAt: row.updated_at
       });
     } catch (err) {
@@ -67,19 +65,17 @@ export default async function handler(req, res) {
     try {
       await initDatabase();
       const body = await readRequestBody(req);
-      const { locations, students, payments, settings } = body;
+      const { locations, students, payments } = body;
 
       const locationsJson = JSON.stringify(locations || []);
       const studentsJson = JSON.stringify(students || []);
       const paymentsJson = JSON.stringify(payments || []);
-      const settingsJson = JSON.stringify(settings || {});
       const nowIso = new Date().toISOString();
 
       await saveUserData(userId, {
         locationsJson,
         studentsJson,
         paymentsJson,
-        settingsJson,
         updatedAt: nowIso
       });
 

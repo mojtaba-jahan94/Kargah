@@ -8,7 +8,6 @@ import {
   Wallet, 
   Download, 
   Upload, 
-  RotateCcw, 
   Moon, 
   Sun,
   Bell,
@@ -25,7 +24,6 @@ export default function Navbar({
   stats, 
   onExport, 
   onImport, 
-  onReset,
   currentAppData,
   onApplyServerData
 }) {
@@ -250,16 +248,6 @@ export default function Navbar({
               accept=".json" 
               style={{ display: 'none' }} 
             />
-
-            {/* Reset Demo Data */}
-            <button
-              onClick={onReset}
-              className="btn btn-ghost"
-              title="بازنشانی داده‌های اولیه دمو"
-              style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <RotateCcw size={14} />
-            </button>
 
             {/* Theme Toggle */}
             <button

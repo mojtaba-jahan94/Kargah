@@ -4,7 +4,6 @@ export const STORAGE_KEYS = {
   LOCATIONS: 'kargah_locations_v1',
   STUDENTS: 'kargah_students_v1',
   PAYMENTS: 'kargah_payments_v1',
-  SETTINGS: 'kargah_settings_v1',
   AUTH_TOKEN: 'kargah_auth_token_v1',
   AUTH_USER: 'kargah_auth_user_v1',
   STORAGE_MODE: 'kargah_storage_mode_v1', // 'local' | 'server'
@@ -150,17 +149,6 @@ export function setLastSyncTime(isoDateStr) {
   } catch (err) {
     console.error('Failed to save last sync time', err);
   }
-}
-
-export function resetAllDataToDefault() {
-  localStorage.removeItem(STORAGE_KEYS.LOCATIONS);
-  localStorage.removeItem(STORAGE_KEYS.STUDENTS);
-  localStorage.removeItem(STORAGE_KEYS.PAYMENTS);
-  return {
-    locations: initialLocations,
-    students: initialStudents,
-    payments: initialPayments,
-  };
 }
 
 export function exportBackupJSON(locations, students, payments) {

@@ -87,7 +87,6 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
       locations: await decryptData(serverData.locations, activePass),
       students: await decryptData(serverData.students, activePass),
       payments: await decryptData(serverData.payments, activePass),
-      settings: await decryptData(serverData.settings, activePass),
     };
   };
 
@@ -136,7 +135,6 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
           locations: await encryptData(rawState.locations || [], password),
           students: await encryptData(rawState.students || [], password),
           payments: await encryptData(rawState.payments || [], password),
-          settings: await encryptData(rawState.settings || {}, password),
         };
       }
 
@@ -188,7 +186,6 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
         locations: await encryptData(dataToSync.locations || [], activePass),
         students: await encryptData(dataToSync.students || [], activePass),
         payments: await encryptData(dataToSync.payments || [], activePass),
-        settings: await encryptData(dataToSync.settings || {}, activePass),
       };
 
       const res = await saveServerData(token, encryptedPayload);

@@ -17,7 +17,6 @@ import {
   saveLocationsToStorage, 
   saveStudentsToStorage, 
   savePaymentsToStorage, 
-  resetAllDataToDefault, 
   exportBackupJSON 
 } from './data/storage';
 import { calculateGlobalStats } from './utils/finance';
@@ -240,14 +239,6 @@ function AppContent({ setAppBridge }) {
     });
   };
 
-  // Reset to default mock
-  const handleResetData = () => {
-    if (confirm('آیا مایلید تمام داده‌ها به حالت اولیه و نمونه بازگردانی شوند؟ (اطلاعات فعلی جایگزین خواهند شد)')) {
-      const defaultData = resetAllDataToDefault();
-      setData(defaultData);
-    }
-  };
-
   // Export JSON backup
   const handleExportData = () => {
     exportBackupJSON(data.locations, data.students, data.payments);
@@ -284,7 +275,6 @@ function AppContent({ setAppBridge }) {
         stats={globalStats}
         onExport={handleExportData}
         onImport={handleImportData}
-        onReset={handleResetData}
         currentAppData={data}
         onApplyServerData={handleApplyServerData}
       />
