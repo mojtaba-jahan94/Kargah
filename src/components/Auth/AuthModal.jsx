@@ -4,15 +4,12 @@ import {
   LogIn, 
   UserPlus, 
   Cloud, 
-  HardDrive, 
   Lock, 
   User, 
   Mail, 
   CheckCircle2, 
   AlertCircle, 
   Loader2,
-  Database,
-  ArrowRight,
   ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -21,9 +18,9 @@ export function AuthModal() {
   const { 
     isAuthModalOpen, 
     closeAuthModal, 
+    isAuthenticated,
     login, 
     register, 
-    tursoStatus,
     setStorageMode
   } = useAuth();
 
@@ -38,23 +35,33 @@ export function AuthModal() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  if (!isAuthModalOpen) return null;
+  // If user is not authenticated, auth modal is strictly mandatory (gating)
+  const isGated = !isAuthenticated;
+  const isVisible = isAuthModalOpen || isGated;
+
+  if (!isVisible) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
+
+    if (password.length < 8) {
+      setErrorMsg('رمز عبور برای امنیت بیشتر باید حداقل ۸ کاراکتر باشد.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (activeTab === 'login') {
         const res = await login(username, password);
         if (res.success) {
-          setSuccessMsg('با موفقیت وارد شدید! حالت ذخیره‌سازی ابری فعال شد.');
+          setSuccessMsg('با موفقیت وارد شدید!');
           setStorageMode('server');
           setTimeout(() => {
             closeAuthModal();
-          }, 1200);
+          }, 800);
         } else {
           setErrorMsg(res.error || 'خطا در ورود به سیستم.');
         }
@@ -67,11 +74,11 @@ export function AuthModal() {
           uploadCurrentData
         });
         if (res.success) {
-          setSuccessMsg('حساب کاربری با موفقیت ساخته شد و اطلاعات اولیه ذخیره گردید!');
+          setSuccessMsg('حساب کاربری با موفقیت ساخته شد و وارد شدید!');
           setStorageMode('server');
           setTimeout(() => {
             closeAuthModal();
-          }, 1200);
+          }, 800);
         } else {
           setErrorMsg(res.error || 'خطا در ایجاد حساب کاربری.');
         }
@@ -83,19 +90,14 @@ export function AuthModal() {
     }
   };
 
-  const handleContinueAsGuest = () => {
-    setStorageMode('local');
-    closeAuthModal();
-  };
-
   return (
     <div 
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
@@ -103,16 +105,16 @@ export function AuthModal() {
         padding: '1rem',
         animation: 'fadeIn 0.2s ease-out'
       }}
-      onClick={closeAuthModal}
+      onClick={isGated ? undefined : closeAuthModal}
     >
       <div 
         style={{
           width: '100%',
-          maxWidth: '460px',
+          maxWidth: '440px',
           backgroundColor: 'var(--bg-card)',
           borderRadius: '1.25rem',
           border: '1px solid var(--border-color)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -144,53 +146,33 @@ export function AuthModal() {
             </div>
             <div>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                {activeTab === 'login' ? 'ورود به حساب کارگاه' : 'ایجاد حساب کاربری ابری'}
+                {activeTab === 'login' ? 'ورود به سامانه کارگاه' : 'ایجاد حساب کاربری'}
               </h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.15rem 0 0 0' }}>
-                همگام‌سازی اطلاعات با پایگاه داده Turso و سرور ورسل
+                ذخیره و همگام‌سازی امن اطلاعات در فضای ابری
               </p>
             </div>
           </div>
 
-          <button
-            onClick={closeAuthModal}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              padding: '0.4rem',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <X size={20} />
-          </button>
+          {!isGated && (
+            <button
+              onClick={closeAuthModal}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                padding: '0.4rem',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
-
-        {/* Notice Banner if Turso is not configured yet */}
-        {tursoStatus.configured === false && (
-          <div style={{
-            margin: '1rem 1.5rem 0',
-            padding: '0.75rem 1rem',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '0.6rem'
-          }}>
-            <Database size={18} color="#f59e0b" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-              <strong>توجه برای استقرار روی ورسل:</strong>
-              <div style={{ marginTop: '0.2rem' }}>
-                متغیرهای <code>TURSO_DATABASE_URL</code> و <code>TURSO_AUTH_TOKEN</code> هنوز در محیط ورسل تنظیم نشده‌اند. می‌توانید همچنان از حالت ذخیره محلی (مرورگر) استفاده کنید.
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Tab Switcher */}
         <div style={{
@@ -293,7 +275,7 @@ export function AuthModal() {
                 <input
                   type="text"
                   required
-                  placeholder="مثلاً: استاد علیزاده"
+                  placeholder="مثلاً: نام شما"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   style={{
@@ -320,7 +302,7 @@ export function AuthModal() {
               <input
                 type="text"
                 required
-                placeholder="حداقل ۳ کاراکتر انگلیسی یا فارسی"
+                placeholder="حداقل ۳ کاراکتر"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 style={{
@@ -346,7 +328,7 @@ export function AuthModal() {
               <div style={{ position: 'relative' }}>
                 <input
                   type="email"
-                  placeholder="art@kargah.ir"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
@@ -369,13 +351,14 @@ export function AuthModal() {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 500, marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
-              رمز عبور
+              رمز عبور <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(حداقل ۸ رقم/کاراکتر)</span>
             </label>
             <div style={{ position: 'relative' }}>
               <input
                 type="password"
                 required
-                placeholder="حداقل ۴ کاراکتر"
+                placeholder="حداقل ۸ کاراکتر"
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{
@@ -411,7 +394,7 @@ export function AuthModal() {
                 onChange={(e) => setUploadCurrentData(e.target.checked)}
                 style={{ width: '16px', height: '16px', accentColor: 'var(--accent-purple, #a855f7)' }}
               />
-              <span>داده‌های فعلی مرورگر در حساب کاربری سرور ذخیره شوند</span>
+              <span>ذخیره اطلاعات فعلی در حساب کاربری</span>
             </label>
           )}
 
@@ -430,7 +413,7 @@ export function AuthModal() {
           }}>
             <ShieldCheck size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
             <span>
-              <strong style={{ color: '#10b981' }}>امنیت سرتاسری ۲۵۶ بیتی (E2EE):</strong> کلیه اطلاعات هنرجویان و کلاس‌ها با استاندارد <strong>AES-256</strong> در مرورگر رمزگذاری می‌شوند؛ سرور تنها کدهای رمز را ذخیره کرده و به متن خصوصی دسترسی ندارد.
+              <strong style={{ color: '#10b981' }}>امنیت سرتاسری ۲۵۶ بیتی:</strong> کلیه اطلاعات قبل از ارسال، با رمز اختصاصی شما در مرورگر رمزگذاری می‌شوند و در سرور به شکل امن نگهداری خواهند شد.
             </span>
           </div>
 
@@ -463,47 +446,28 @@ export function AuthModal() {
             ) : activeTab === 'login' ? (
               <>
                 <LogIn size={18} />
-                ورود به حساب و فعال‌سازی ذخیره ابری
+                ورود به حساب کاربری
               </>
             ) : (
               <>
                 <UserPlus size={18} />
-                ثبت‌نام و اتصال به پایگاه داده Turso
+                ثبت‌نام و ورود
               </>
             )}
           </button>
         </form>
 
-        {/* Footer: Option to stay in Browser / LocalStorage mode */}
+        {/* Footer */}
         <div style={{
-          padding: '1rem 1.5rem',
+          padding: '0.85rem 1.5rem',
           backgroundColor: 'rgba(255, 255, 255, 0.02)',
           borderTop: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'center'
         }}>
-          <button
-            type="button"
-            onClick={handleContinueAsGuest}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              fontSize: '0.82rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: 0
-            }}
-          >
-            <HardDrive size={15} />
-            ادامه با حافظه محلی مرورگر (آفلاین)
-          </button>
-
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            کارگاه v1.2
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            سامانه مدیریت آموزشگاه و کارگاه هنری
           </span>
         </div>
       </div>

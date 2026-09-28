@@ -177,7 +177,7 @@ export async function findUserById(userId) {
 
   if (db.type === 'postgres') {
     const rows = await db.client`
-      SELECT id, username, email, full_name, created_at
+      SELECT id, username, email, password_hash, full_name, created_at
       FROM users
       WHERE id = ${userId}
       LIMIT 1
@@ -185,11 +185,31 @@ export async function findUserById(userId) {
     return rows[0] || null;
   } else {
     const res = await db.client.execute({
-      sql: 'SELECT id, username, email, full_name, created_at FROM users WHERE id = ? LIMIT 1',
+      sql: 'SELECT id, username, email, password_hash, full_name, created_at FROM users WHERE id = ? LIMIT 1',
       args: [userId]
     });
     return res.rows[0] || null;
   }
+}
+
+export async function deleteUserAndData(userId) {
+  const db = getDatabase();
+  if (!db) throw new Error('Database not configured');
+
+  if (db.type === 'postgres') {
+    await db.client`DELETE FROM user_data WHERE user_id = ${userId}`;
+    await db.client`DELETE FROM users WHERE id = ${userId}`;
+  } else {
+    await db.client.execute({
+      sql: 'DELETE FROM user_data WHERE user_id = ?',
+      args: [userId]
+    });
+    await db.client.execute({
+      sql: 'DELETE FROM users WHERE id = ?',
+      args: [userId]
+    });
+  }
+  return { success: true };
 }
 
 export async function createUser({ id, username, email, passwordHash, fullName, createdAt }) {

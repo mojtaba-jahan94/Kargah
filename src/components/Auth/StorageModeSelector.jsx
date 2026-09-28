@@ -59,7 +59,7 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
     setFeedback('در حال ارسال به سرور...');
     const res = await pushToServer(currentAppData);
     if (res.success) {
-      setFeedback('اطلاعات با موفقیت در سرور Turso ذخیره شد.');
+      setFeedback('اطلاعات با موفقیت در فضای ابری ذخیره شد.');
       setTimeout(() => setFeedback(''), 3000);
     } else {
       setFeedback(res.error || 'خطا در ارسال به سرور');
@@ -309,12 +309,12 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
               <div style={{ padding: '0.4rem 0.6rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Database size={13} color="var(--accent-purple, #a855f7)" />
-                  <span>وضعیت پایگاه داده:</span>
+                  <span>وضعیت اتصال ابری:</span>
                   <span style={{ 
                     fontWeight: 600, 
                     color: tursoStatus.configured ? '#10b981' : '#f59e0b' 
                   }}>
-                    {tursoStatus.configured ? 'متصل به Turso' : 'تنظیم نشده در ورسل'}
+                    {tursoStatus.configured ? 'متصل و آماده' : 'در حال بررسی...'}
                   </span>
                 </div>
               </div>

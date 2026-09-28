@@ -167,3 +167,19 @@ export function exportBackupJSON(locations, students, payments) {
   downloadAnchor.click();
   downloadAnchor.remove();
 }
+
+export function clearAllAppData() {
+  try {
+    localStorage.setItem(STORAGE_KEYS.LOCATIONS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify([]));
+  } catch (err) {
+    console.error('Failed to clear app data from storage', err);
+  }
+  return {
+    locations: [],
+    students: [],
+    payments: [],
+  };
+}
+

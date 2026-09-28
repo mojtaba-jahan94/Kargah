@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       status: 'connected',
       engine: db.type,
       name: db.name,
-      message: `پایگاه داده ابری (${db.name}) متصل و فعال است.`,
+      message: 'پایگاه داده ابری متصل و فعال است.',
       ping: pingResult
     });
   } catch (err) {

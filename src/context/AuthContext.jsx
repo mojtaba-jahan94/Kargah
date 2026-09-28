@@ -17,7 +17,8 @@ import {
   getCurrentUser, 
   fetchServerData, 
   saveServerData, 
-  checkServerStatus 
+  checkServerStatus,
+  deleteAccountApi
 } from '../services/api';
 import { encryptData, decryptData } from '../utils/crypto';
 
@@ -233,6 +234,25 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
     }
   }, [token, passphrase, onServerDataLoaded]);
 
+  // Delete Account
+  const deleteAccount = useCallback(async (password) => {
+    if (!token) return { success: false, error: 'نشست کاربری نامعتبر است' };
+    try {
+      const res = await deleteAccountApi(token, password);
+      clearStoredAuthSession();
+      clearStoredEncryptionPassphrase();
+      localStorage.removeItem('kargah_locations_v1');
+      localStorage.removeItem('kargah_students_v1');
+      localStorage.removeItem('kargah_payments_v1');
+      setSession({ token: null, user: null });
+      setPassphrase(null);
+      setMode('server');
+      return { success: true, message: res.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, [token]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -253,6 +273,7 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
         login,
         register,
         logout,
+        deleteAccount,
         pushToServer,
         pullFromServer,
       }}

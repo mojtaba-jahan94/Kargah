@@ -39,8 +39,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'INVALID_USERNAME', message: 'نام کاربری باید حداقل ۳ کاراکتر باشد.' });
     }
 
-    if (!cleanPassword || cleanPassword.length < 4) {
-      return res.status(400).json({ error: 'INVALID_PASSWORD', message: 'رمز عبور باید حداقل ۴ کاراکتر باشد.' });
+    if (!cleanPassword || cleanPassword.length < 8) {
+      return res.status(400).json({ error: 'INVALID_PASSWORD', message: 'رمز عبور برای امنیت بیشتر باید حداقل ۸ کاراکتر باشد.' });
     }
 
     // Check if user already exists

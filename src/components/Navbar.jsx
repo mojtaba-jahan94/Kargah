@@ -11,7 +11,8 @@ import {
   Moon, 
   Sun,
   Bell,
-  Sparkles
+  Sparkles,
+  Settings
 } from 'lucide-react';
 import { toPersianDigits } from '../utils/jalali';
 import { StorageModeSelector } from './Auth/StorageModeSelector';
@@ -24,6 +25,7 @@ export default function Navbar({
   stats, 
   onExport, 
   onImport, 
+  onOpenSettings,
   currentAppData,
   onApplyServerData
 }) {
@@ -257,6 +259,16 @@ export default function Navbar({
               style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               {theme === 'dark' ? <Sun size={14} color="var(--accent-gold)" /> : <Moon size={14} />}
+            </button>
+
+            {/* Settings Modal Button */}
+            <button
+              onClick={onOpenSettings}
+              className="btn btn-secondary"
+              title="تنظیمات برنامه"
+              style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Settings size={14} />
             </button>
           </div>
         </div>

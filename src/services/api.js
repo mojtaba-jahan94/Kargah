@@ -77,6 +77,23 @@ export async function saveServerData(token, payload) {
   return data;
 }
 
+export async function deleteAccountApi(token, password) {
+  const res = await fetch(`${BASE_URL}/api/auth/delete-account`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ password })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || 'خطا در حذف حساب کاربری');
+  }
+  return data;
+}
+
 export async function checkServerStatus() {
   try {
     const res = await fetch(`${BASE_URL}/api/status`);
@@ -86,3 +103,5 @@ export async function checkServerStatus() {
     return { configured: false, status: 'offline', message: 'عدم ارتباط با سرور' };
   }
 }
+
+

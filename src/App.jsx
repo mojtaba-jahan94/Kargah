@@ -11,13 +11,16 @@ import { PaymentModal } from './components/Wallet/PaymentModal';
 import { InstallPWA } from './components/Common/InstallPWA';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/Auth/AuthModal';
+import { SettingsModal } from './components/Settings/SettingsModal';
+import { Loader2 } from 'lucide-react';
 
 import { 
   loadStoredData, 
   saveLocationsToStorage, 
   saveStudentsToStorage, 
   savePaymentsToStorage, 
-  exportBackupJSON 
+  exportBackupJSON,
+  clearAllAppData
 } from './data/storage';
 import { calculateGlobalStats } from './utils/finance';
 
@@ -31,9 +34,19 @@ function AppContent({ setAppBridge }) {
   const [selectedStudentForDetailId, setSelectedStudentForDetailId] = useState(null);
   const [selectedStudentForRenew, setSelectedStudentForRenew] = useState(null);
   const [selectedStudentForPayment, setSelectedStudentForPayment] = useState(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const { storageMode, pushToServer, isAuthenticated } = useAuth();
+  const { storageMode, pushToServer, isAuthenticated, isAuthLoading } = useAuth();
   const isInitialMount = useRef(true);
+
+  // Clear all data (demo/storage reset)
+  const handleClearAllData = () => {
+    const emptyData = clearAllAppData();
+    setData(emptyData);
+    if (storageMode === 'server' && isAuthenticated) {
+      pushToServer(emptyData);
+    }
+  };
 
   // Sync to localStorage
   useEffect(() => {
@@ -265,6 +278,22 @@ function AppContent({ setAppBridge }) {
     ? data.students.find(s => s.id === selectedStudentForDetailId)
     : null;
 
+  if (isAuthLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-main, #0f172a)' }}>
+        <Loader2 size={36} className="spin-animation" color="var(--accent-purple, #a855f7)" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-main, #0f172a)' }}>
+        <AuthModal />
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar
@@ -275,6 +304,7 @@ function AppContent({ setAppBridge }) {
         stats={globalStats}
         onExport={handleExportData}
         onImport={handleImportData}
+        onOpenSettings={() => setIsSettingsOpen(true)}
         currentAppData={data}
         onApplyServerData={handleApplyServerData}
       />
@@ -342,6 +372,19 @@ function AppContent({ setAppBridge }) {
 
       {/* Global Modals */}
       <AuthModal />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onExportData={handleExportData}
+        onImportData={() => {
+          setIsSettingsOpen(false);
+          const fileInput = document.querySelector('input[type="file"][accept=".json"]');
+          if (fileInput) fileInput.click();
+        }}
+        onClearAllData={handleClearAllData}
+      />
 
       {currentDetailStudent && (
         <StudentDetailModal
