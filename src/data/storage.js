@@ -114,6 +114,28 @@ export function clearStoredAuthSession() {
   }
 }
 
+// In-Memory / Session E2EE passphrase (never stored in localStorage)
+export function getStoredEncryptionPassphrase() {
+  try {
+    return sessionStorage.getItem('kargah_e2ee_pass_v1');
+  } catch {
+    return null;
+  }
+}
+
+export function saveStoredEncryptionPassphrase(pass) {
+  try {
+    if (pass) sessionStorage.setItem('kargah_e2ee_pass_v1', pass);
+    else sessionStorage.removeItem('kargah_e2ee_pass_v1');
+  } catch {}
+}
+
+export function clearStoredEncryptionPassphrase() {
+  try {
+    sessionStorage.removeItem('kargah_e2ee_pass_v1');
+  } catch {}
+}
+
 export function getLastSyncTime() {
   try {
     return localStorage.getItem(STORAGE_KEYS.LAST_SYNC);

@@ -6,7 +6,10 @@ import {
   getSavedStorageMode, 
   setSavedStorageMode,
   getLastSyncTime,
-  setLastSyncTime
+  setLastSyncTime,
+  getStoredEncryptionPassphrase,
+  saveStoredEncryptionPassphrase,
+  clearStoredEncryptionPassphrase
 } from '../data/storage';
 import { 
   loginUser, 
@@ -16,11 +19,13 @@ import {
   saveServerData, 
   checkServerStatus 
 } from '../services/api';
+import { encryptData, decryptData } from '../utils/crypto';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState }) {
   const [session, setSession] = useState(() => getStoredAuthSession());
+  const [passphrase, setPassphrase] = useState(() => getStoredEncryptionPassphrase());
   const [storageMode, setMode] = useState(() => getSavedStorageMode()); // 'local' | 'server'
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -33,7 +38,7 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
   const token = session.token;
   const isAuthenticated = !!(token && user);
 
-  // Check Turso status on mount
+  // Check backend database status on mount
   useEffect(() => {
     checkServerStatus()
       .then(res => setTursoStatus(res))
@@ -53,7 +58,9 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
         } catch (err) {
           console.warn('Session expired or invalid, reverting to local guest mode', err);
           clearStoredAuthSession();
+          clearStoredEncryptionPassphrase();
           setSession({ token: null, user: null });
+          setPassphrase(null);
         }
       }
       setIsAuthLoading(false);
@@ -71,6 +78,19 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
     setSavedStorageMode(newMode);
   };
 
+  // Helper to decrypt server payload
+  const decryptServerPayload = async (serverData, pass) => {
+    if (!serverData) return null;
+    const activePass = pass || passphrase || getStoredEncryptionPassphrase();
+    return {
+      ...serverData,
+      locations: await decryptData(serverData.locations, activePass),
+      students: await decryptData(serverData.students, activePass),
+      payments: await decryptData(serverData.payments, activePass),
+      settings: await decryptData(serverData.settings, activePass),
+    };
+  };
+
   // Login handler
   const login = async (username, password) => {
     setSyncStatus('idle');
@@ -78,16 +98,19 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
     try {
       const res = await loginUser(username, password);
       saveStoredAuthSession(res.token, res.user);
+      saveStoredEncryptionPassphrase(password);
       setSession({ token: res.token, user: res.user });
+      setPassphrase(password);
       setIsAuthModalOpen(false);
 
-      // Prompt to load data from server
+      // Auto-load & decrypt data from server
       try {
-        const serverData = await fetchServerData(res.token);
-        if (serverData.found && onServerDataLoaded) {
-          onServerDataLoaded(serverData);
-          setLastSync(serverData.updatedAt || new Date().toISOString());
-          setLastSyncTime(serverData.updatedAt);
+        const rawServerData = await fetchServerData(res.token);
+        if (rawServerData.found && onServerDataLoaded) {
+          const decrypted = await decryptServerPayload(rawServerData, password);
+          onServerDataLoaded(decrypted);
+          setLastSync(decrypted.updatedAt || new Date().toISOString());
+          setLastSyncTime(decrypted.updatedAt);
         }
       } catch (err) {
         console.warn('Could not auto-fetch server data on login', err);
@@ -105,11 +128,24 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
     setSyncStatus('idle');
     setSyncError(null);
     try {
-      const initialData = uploadCurrentData && getCurrentAppState ? getCurrentAppState() : null;
+      let initialData = null;
+      if (uploadCurrentData && getCurrentAppState) {
+        const rawState = getCurrentAppState();
+        // Client-side Encrypt before sending to server
+        initialData = {
+          locations: await encryptData(rawState.locations || [], password),
+          students: await encryptData(rawState.students || [], password),
+          payments: await encryptData(rawState.payments || [], password),
+          settings: await encryptData(rawState.settings || {}, password),
+        };
+      }
+
       const res = await registerUser({ username, password, fullName, email, initialData });
       
       saveStoredAuthSession(res.token, res.user);
+      saveStoredEncryptionPassphrase(password);
       setSession({ token: res.token, user: res.user });
+      setPassphrase(password);
       setIsAuthModalOpen(false);
 
       if (initialData) {
@@ -128,13 +164,15 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
   // Logout handler
   const logout = () => {
     clearStoredAuthSession();
+    clearStoredEncryptionPassphrase();
     setSession({ token: null, user: null });
+    setPassphrase(null);
     handleSetStorageMode('local');
     setSyncStatus('idle');
     setSyncError(null);
   };
 
-  // Manual Push to Server
+  // Manual Push to Server (Always Client-Side Encrypted)
   const pushToServer = useCallback(async (dataToSync) => {
     if (!token) {
       setIsAuthModalOpen(true);
@@ -144,7 +182,16 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
     setSyncStatus('syncing');
     setSyncError(null);
     try {
-      const res = await saveServerData(token, dataToSync);
+      const activePass = passphrase || getStoredEncryptionPassphrase();
+      // Encrypt all data models before network transmission
+      const encryptedPayload = {
+        locations: await encryptData(dataToSync.locations || [], activePass),
+        students: await encryptData(dataToSync.students || [], activePass),
+        payments: await encryptData(dataToSync.payments || [], activePass),
+        settings: await encryptData(dataToSync.settings || {}, activePass),
+      };
+
+      const res = await saveServerData(token, encryptedPayload);
       const now = res.updatedAt || new Date().toISOString();
       setLastSync(now);
       setLastSyncTime(now);
@@ -156,9 +203,9 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
       setSyncError(err.message);
       return { success: false, error: err.message };
     }
-  }, [token]);
+  }, [token, passphrase]);
 
-  // Manual Pull from Server
+  // Manual Pull from Server (With Client-Side Decryption)
   const pullFromServer = useCallback(async () => {
     if (!token) {
       setIsAuthModalOpen(true);
@@ -168,15 +215,16 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
     setSyncStatus('syncing');
     setSyncError(null);
     try {
-      const res = await fetchServerData(token);
-      if (res.found && onServerDataLoaded) {
-        onServerDataLoaded(res);
-        const now = res.updatedAt || new Date().toISOString();
+      const rawRes = await fetchServerData(token);
+      if (rawRes.found && onServerDataLoaded) {
+        const decrypted = await decryptServerPayload(rawRes);
+        onServerDataLoaded(decrypted);
+        const now = decrypted.updatedAt || new Date().toISOString();
         setLastSync(now);
         setLastSyncTime(now);
         setSyncStatus('synced');
         setTimeout(() => setSyncStatus('idle'), 3000);
-        return { success: true, data: res };
+        return { success: true, data: decrypted };
       } else {
         setSyncStatus('idle');
         return { success: true, message: 'داده‌ای روی سرور وجود ندارد' };
@@ -186,7 +234,7 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
       setSyncError(err.message);
       return { success: false, error: err.message };
     }
-  }, [token, onServerDataLoaded]);
+  }, [token, passphrase, onServerDataLoaded]);
 
   return (
     <AuthContext.Provider
@@ -195,6 +243,7 @@ export function AuthProvider({ children, onServerDataLoaded, getCurrentAppState 
         token,
         isAuthenticated,
         isAuthLoading,
+        isE2EEActive: true,
         storageMode,
         setStorageMode: handleSetStorageMode,
         isAuthModalOpen,

@@ -12,7 +12,8 @@ import {
   AlertCircle, 
   Loader2,
   Database,
-  ArrowRight
+  ArrowRight,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -413,6 +414,25 @@ export function AuthModal() {
               <span>داده‌های فعلی مرورگر در حساب کاربری سرور ذخیره شوند</span>
             </label>
           )}
+
+          {/* E2EE Maximum Security Notice */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.5rem',
+            padding: '0.55rem 0.75rem',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.25)',
+            fontSize: '0.78rem',
+            color: 'var(--text-secondary)',
+            lineHeight: '1.45'
+          }}>
+            <ShieldCheck size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <span>
+              <strong style={{ color: '#10b981' }}>امنیت سرتاسری ۲۵۶ بیتی (E2EE):</strong> کلیه اطلاعات هنرجویان و کلاس‌ها با استاندارد <strong>AES-256</strong> در مرورگر رمزگذاری می‌شوند؛ سرور تنها کدهای رمز را ذخیره کرده و به متن خصوصی دسترسی ندارد.
+            </span>
+          </div>
 
           <button
             type="submit"

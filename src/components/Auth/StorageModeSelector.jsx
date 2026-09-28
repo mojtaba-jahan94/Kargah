@@ -10,7 +10,8 @@ import {
   UploadCloud, 
   DownloadCloud, 
   ChevronDown,
-  Database
+  Database,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -284,7 +285,23 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
                   color: storageMode === 'server' ? 'var(--accent-purple, #a855f7)' : 'var(--accent-green, #10b981)'
                 }}>
                   {storageMode === 'server' ? <Cloud size={10} /> : <HardDrive size={10} />}
-                  حالت ذخیره: {storageMode === 'server' ? 'سرور ابری Turso' : 'حافظه محلی مرورگر'}
+                  حالت ذخیره: {storageMode === 'server' ? 'سرور ابری' : 'حافظه محلی مرورگر'}
+                </div>
+
+                <div style={{
+                  marginTop: '0.35rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.72rem',
+                  backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                  color: '#10b981',
+                  border: '1px solid rgba(16, 185, 129, 0.25)'
+                }}>
+                  <ShieldCheck size={13} style={{ flexShrink: 0 }} />
+                  <span>رمزنگاری سرتاسری ۲۵۶ بیتی (E2EE) فعال</span>
                 </div>
               </div>
 
