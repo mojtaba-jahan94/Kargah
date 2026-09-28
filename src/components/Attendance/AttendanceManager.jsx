@@ -12,7 +12,10 @@ import {
   RotateCcw,
   CheckCheck,
   AlertCircle,
-  Calendar
+  Calendar,
+  ChevronDown,
+  ChevronsDown,
+  ChevronsUp
 } from 'lucide-react';
 import { getTodayJalaliString, getTodayDayOfWeek, toPersianDigits, formatJalaliReadable } from '../../utils/jalali';
 import { SessionCounter } from '../Common/SessionCounter';
@@ -31,13 +34,36 @@ export function AttendanceManager({
   const [attendanceState, setAttendanceState] = useState({});
   const [savedSuccessMessage, setSavedSuccessMessage] = useState(null);
 
+  // Accordion drawer expanded state (defaults to all expanded)
+  const [expandedAttIds, setExpandedAttIds] = useState(() => new Set(students.map(s => s.id)));
+
   const filteredStudents = students.filter(s => {
     const matchesLoc = selectedLocation === 'all' || s.locationId === selectedLocation;
     const matchesSearch = s.name.includes(searchTerm) || s.discipline.includes(searchTerm);
     return matchesLoc && matchesSearch;
   });
 
-  const handleStatusChange = (studentId, status) => {
+  const isAllExpanded = filteredStudents.length > 0 && filteredStudents.every(s => expandedAttIds.has(s.id));
+
+  const toggleAll = () => {
+    if (isAllExpanded) {
+      setExpandedAttIds(new Set());
+    } else {
+      setExpandedAttIds(new Set(students.map(s => s.id)));
+    }
+  };
+
+  const toggleStudent = (id) => {
+    setExpandedAttIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleStatusChange = (studentId, status, e) => {
+    if (e) e.stopPropagation();
     setAttendanceState(prev => ({
       ...prev,
       [studentId]: {
@@ -102,7 +128,7 @@ export function AttendanceManager({
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '0.85rem',
         background: 'var(--bg-glass)',
         padding: '1.25rem 1.4rem',
         borderRadius: '16px',
@@ -183,7 +209,7 @@ export function AttendanceManager({
         borderRadius: '14px',
         border: '1px solid var(--border-color)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, flexWrap: 'wrap', minWidth: '260px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, flexWrap: 'wrap', minWidth: '240px' }}>
           {/* Search */}
           <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
             <Search size={15} style={{ position: 'absolute', right: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -211,12 +237,22 @@ export function AttendanceManager({
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'space-between', marginTop: '0.25rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.8rem', padding: '0.45rem 0.8rem', minHeight: '36px' }}
+          >
+            {isAllExpanded ? <ChevronsUp size={15} /> : <ChevronsDown size={15} />}
+            <span>{isAllExpanded ? 'جمع کردن همه' : 'باز کردن همه'}</span>
+          </button>
+
           <button
             type="button"
             onClick={handleMarkAllPresent}
             className="btn btn-secondary"
-            style={{ fontSize: '0.82rem', flex: 1 }}
+            style={{ fontSize: '0.82rem', minHeight: '36px' }}
           >
             <CheckCheck size={16} />
             <span>حاضر بودن همه</span>
@@ -226,67 +262,111 @@ export function AttendanceManager({
             type="button"
             onClick={handleSubmitAttendance}
             className="btn btn-primary"
-            style={{ fontSize: '0.85rem', flex: 1.2 }}
+            style={{ fontSize: '0.85rem', minHeight: '36px' }}
           >
             <Save size={16} />
-            <span>ثبت نهایی حضور/غیاب</span>
+            <span>ثبت نهایی</span>
           </button>
         </div>
       </div>
 
-      {/* Attendance Students List - Highly Mobile Optimized */}
+      {/* Attendance Students List - Collapsible Accordion Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
         {filteredStudents.map(student => {
           const location = locations.find(l => l.id === student.locationId);
           const currentEntry = attendanceState[student.id] || {};
           const currentStatus = currentEntry.status || null;
+          const isExpanded = expandedAttIds.has(student.id);
 
           return (
             <div
               key={student.id}
               className="glass-card"
               style={{
-                padding: '1.1rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.85rem',
+                position: 'relative',
+                overflow: 'hidden',
                 borderRight: currentStatus === 'present' 
                   ? '4px solid #10b981' 
                   : currentStatus === 'absent' 
                   ? '4px solid #f43f5e' 
                   : currentStatus === 'excused' 
                   ? '4px solid #f59e0b' 
-                  : '4px solid transparent'
+                  : '4px solid transparent',
+                transition: 'all 0.25s ease'
               }}
             >
-              {/* Header Row: Student info & Session status */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: '0.75rem',
-                flexWrap: 'wrap'
-              }}>
+              {/* Header Row - Clickable to Toggle Drawer */}
+              <div
+                onClick={() => toggleStudent(student.id)}
+                style={{
+                  padding: '1rem 1.25rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  background: isExpanded ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
+                  borderBottom: isExpanded ? '1px solid var(--border-color)' : '1px solid transparent',
+                  transition: 'background 0.2s ease, border-color 0.2s ease',
+                  flexWrap: 'wrap'
+                }}
+              >
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '1.02rem', color: 'var(--text-primary)' }}>
-                    {student.name}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700, fontSize: '1.02rem', color: 'var(--text-primary)' }}>
+                      {student.name}
+                    </span>
                     <span className="badge badge-amber" style={{ padding: '0.1rem 0.45rem', fontSize: '0.72rem' }}>
                       {student.discipline}
                     </span>
-                    <span>•</span>
-                    <span>{location?.name}</span>
-                    {student.preferredDayTime && (
-                      <>
-                        <span>•</span>
-                        <span style={{ color: 'var(--text-muted)' }}>{student.preferredDayTime}</span>
-                      </>
+                    {currentStatus && (
+                      <span className={
+                        currentStatus === 'present' ? 'badge badge-emerald' :
+                        currentStatus === 'absent' ? 'badge badge-rose' : 'badge badge-amber'
+                      } style={{ fontSize: '0.72rem' }}>
+                        {currentStatus === 'present' ? 'حاضر (-۱)' : currentStatus === 'absent' ? 'غایب (-۱)' : 'کنسلی هماهنگ'}
+                      </span>
                     )}
+                  </div>
+
+                  <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                    {location?.name} • جلسه {toPersianDigits(student.sessionsCompleted)} از {toPersianDigits(student.packageTotalSessions)}
                   </div>
                 </div>
 
-                <div style={{ minWidth: '150px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-secondary)',
+                    transition: 'transform 0.25s ease',
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                  }}>
+                    <ChevronDown size={18} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Accordion Drawer Body */}
+              <div style={{
+                maxHeight: isExpanded ? '400px' : '0px',
+                opacity: isExpanded ? 1 : 0,
+                overflow: 'hidden',
+                transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease',
+                padding: isExpanded ? '1rem 1.25rem' : '0 1.25rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.85rem'
+              }}>
+                <div>
                   <SessionCounter
                     total={student.packageTotalSessions}
                     completed={student.sessionsCompleted}
@@ -294,94 +374,94 @@ export function AttendanceManager({
                     showText={true}
                   />
                 </div>
-              </div>
 
-              {/* 3-State Attendance Selector Buttons */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1.2fr',
-                gap: '0.45rem'
-              }}>
-                {/* Present (Deduct 1) */}
-                <button
-                  type="button"
-                  onClick={() => handleStatusChange(student.id, 'present')}
-                  style={{
-                    padding: '0.65rem 0.35rem',
-                    borderRadius: '8px',
-                    border: currentStatus === 'present' ? '1px solid #10b981' : '1px solid var(--border-color)',
-                    background: currentStatus === 'present' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.03)',
-                    color: currentStatus === 'present' ? '#34d399' : 'var(--text-secondary)',
-                    fontWeight: currentStatus === 'present' ? 700 : 500,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.3rem',
-                    fontSize: '0.82rem',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <CheckCircle2 size={16} />
-                  <span>حاضر (-۱)</span>
-                </button>
+                {/* 3-State Attendance Selector Buttons */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                  gap: '0.45rem'
+                }}>
+                  {/* Present (Deduct 1) */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleStatusChange(student.id, 'present', e)}
+                    style={{
+                      padding: '0.65rem 0.35rem',
+                      borderRadius: '8px',
+                      border: currentStatus === 'present' ? '1px solid #10b981' : '1px solid var(--border-color)',
+                      background: currentStatus === 'present' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.03)',
+                      color: currentStatus === 'present' ? '#34d399' : 'var(--text-secondary)',
+                      fontWeight: currentStatus === 'present' ? 700 : 500,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.3rem',
+                      fontSize: '0.82rem',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>حاضر (-۱)</span>
+                  </button>
 
-                {/* Absent (Deduct 1) */}
-                <button
-                  type="button"
-                  onClick={() => handleStatusChange(student.id, 'absent')}
-                  style={{
-                    padding: '0.65rem 0.35rem',
-                    borderRadius: '8px',
-                    border: currentStatus === 'absent' ? '1px solid #f43f5e' : '1px solid var(--border-color)',
-                    background: currentStatus === 'absent' ? 'rgba(244, 63, 94, 0.25)' : 'rgba(255, 255, 255, 0.03)',
-                    color: currentStatus === 'absent' ? '#fb7185' : 'var(--text-secondary)',
-                    fontWeight: currentStatus === 'absent' ? 700 : 500,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.3rem',
-                    fontSize: '0.82rem',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <XCircle size={16} />
-                  <span>غایب (-۱)</span>
-                </button>
+                  {/* Absent (Deduct 1) */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleStatusChange(student.id, 'absent', e)}
+                    style={{
+                      padding: '0.65rem 0.35rem',
+                      borderRadius: '8px',
+                      border: currentStatus === 'absent' ? '1px solid #f43f5e' : '1px solid var(--border-color)',
+                      background: currentStatus === 'absent' ? 'rgba(244, 63, 94, 0.25)' : 'rgba(255, 255, 255, 0.03)',
+                      color: currentStatus === 'absent' ? '#fb7185' : 'var(--text-secondary)',
+                      fontWeight: currentStatus === 'absent' ? 700 : 500,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.3rem',
+                      fontSize: '0.82rem',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <XCircle size={16} />
+                    <span>غایب (-۱)</span>
+                  </button>
 
-                {/* Excused (No deduction) */}
-                <button
-                  type="button"
-                  onClick={() => handleStatusChange(student.id, 'excused')}
-                  style={{
-                    padding: '0.65rem 0.35rem',
-                    borderRadius: '8px',
-                    border: currentStatus === 'excused' ? '1px solid #f59e0b' : '1px solid var(--border-color)',
-                    background: currentStatus === 'excused' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.03)',
-                    color: currentStatus === 'excused' ? 'var(--accent-gold)' : 'var(--text-secondary)',
-                    fontWeight: currentStatus === 'excused' ? 700 : 500,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.3rem',
-                    fontSize: '0.8rem',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title="کنسلی با اطلاع قبلی - جلسه سوخت نمی‌شود"
-                >
-                  <Clock size={16} />
-                  <span>کنسلی هماهنگ</span>
-                </button>
-              </div>
+                  {/* Excused (No deduction) */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleStatusChange(student.id, 'excused', e)}
+                    style={{
+                      padding: '0.65rem 0.35rem',
+                      borderRadius: '8px',
+                      border: currentStatus === 'excused' ? '1px solid #f59e0b' : '1px solid var(--border-color)',
+                      background: currentStatus === 'excused' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.03)',
+                      color: currentStatus === 'excused' ? 'var(--accent-gold)' : 'var(--text-secondary)',
+                      fontWeight: currentStatus === 'excused' ? 700 : 500,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.3rem',
+                      fontSize: '0.8rem',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title="کنسلی با اطلاع قبلی - جلسه سوخت نمی‌شود"
+                  >
+                    <Clock size={16} />
+                    <span>کنسلی هماهنگ</span>
+                  </button>
+                </div>
 
-              {/* Session Note */}
-              <div>
-                <input
-                  type="text"
-                  placeholder="خلاصه درس، قطعه تدریس‌شده یا علت غیبت/کنسلی..."
-                  value={currentEntry.note || ''}
-                  onChange={(e) => handleNoteChange(student.id, e.target.value)}
-                  style={{ fontSize: '0.82rem', padding: '0.55rem 0.75rem' }}
-                />
+                {/* Session Note */}
+                <div>
+                  <input
+                    type="text"
+                    placeholder="خلاصه درس، قطعه تدریس‌شده یا علت غیبت/کنسلی..."
+                    value={currentEntry.note || ''}
+                    onChange={(e) => handleNoteChange(student.id, e.target.value)}
+                    style={{ fontSize: '0.82rem', padding: '0.55rem 0.75rem' }}
+                  />
+                </div>
               </div>
             </div>
           );

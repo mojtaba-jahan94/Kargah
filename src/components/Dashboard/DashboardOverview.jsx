@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   MapPin, 
@@ -14,7 +14,8 @@ import {
   Building2,
   BookOpen,
   ArrowUpRight,
-  ShieldAlert
+  ShieldAlert,
+  ChevronDown
 } from 'lucide-react';
 import { toPersianDigits, getTodayJalaliString, getTodayDayOfWeek } from '../../utils/jalali';
 import { formatToman, formatPercent } from '../../utils/formatters';
@@ -28,6 +29,9 @@ export default function DashboardOverview({
   onSelectStudent,
   onQuickAttendance
 }) {
+  const [isUrgentExpanded, setIsUrgentExpanded] = useState(true);
+  const [isLocationExpanded, setIsLocationExpanded] = useState(true);
+
   const stats = calculateGlobalStats(locations, students);
   const todayDate = getTodayJalaliString();
   const dayOfWeek = getTodayDayOfWeek();
@@ -182,23 +186,68 @@ export default function DashboardOverview({
             background: 'var(--bg-card)',
             borderRadius: '16px',
             border: '1px solid var(--border-color)',
-            padding: '1.15rem'
+            padding: '1.15rem',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+            {/* Clickable Header for Collapsing */}
+            <div 
+              onClick={() => setIsUrgentExpanded(!isUrgentExpanded)}
+              style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                cursor: 'pointer',
+                userSelect: 'none'
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                 <ShieldAlert size={17} color="var(--accent-gold)" />
                 <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>اقدامات و هشدارهای نیازمند پیگیری</h3>
+                {(urgentRenewals.length > 0 || urgentDebtors.length > 0) && (
+                  <span className="badge badge-amber" style={{ fontSize: '0.7rem' }}>
+                    {toPersianDigits(urgentRenewals.length + urgentDebtors.length)}
+                  </span>
+                )}
               </div>
-              <button 
-                onClick={() => onNavigateTab('wallet')} 
-                className="btn btn-ghost"
-                style={{ fontSize: '0.78rem', padding: '0.2rem 0.45rem', minHeight: '30px' }}
-              >
-                مشاهده همه
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNavigateTab('wallet');
+                  }} 
+                  className="btn btn-ghost"
+                  style={{ fontSize: '0.78rem', padding: '0.2rem 0.45rem', minHeight: '30px' }}
+                >
+                  مشاهده همه
+                </button>
+                <div style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-secondary)',
+                  transition: 'transform 0.25s ease',
+                  transform: isUrgentExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                }}>
+                  <ChevronDown size={16} />
+                </div>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            {/* Collapsible Drawer */}
+            <div style={{
+              maxHeight: isUrgentExpanded ? '900px' : '0px',
+              opacity: isUrgentExpanded ? 1 : 0,
+              overflow: 'hidden',
+              transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.65rem',
+              marginTop: isUrgentExpanded ? '0.85rem' : '0px'
+            }}>
               {urgentRenewals.length === 0 && urgentDebtors.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                   هیچ هشدار فوری وجود ندارد.
@@ -268,23 +317,63 @@ export default function DashboardOverview({
           padding: '1.15rem',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between'
+          overflow: 'hidden'
         }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                <Building2 size={17} color="#60a5fa" />
-                <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>سهم و خالص دریافتی آموزشگاه‌ها</h3>
-              </div>
+          {/* Clickable Header for Collapsing */}
+          <div 
+            onClick={() => setIsLocationExpanded(!isLocationExpanded)}
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              cursor: 'pointer',
+              userSelect: 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <Building2 size={17} color="#60a5fa" />
+              <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>سهم و خالص دریافتی آموزشگاه‌ها</h3>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               <button 
-                onClick={() => onNavigateTab('locations')} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigateTab('locations');
+                }} 
                 className="btn btn-ghost"
                 style={{ fontSize: '0.78rem', padding: '0.2rem 0.45rem', minHeight: '30px' }}
               >
                 مدیریت موقعیت‌ها
               </button>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-secondary)',
+                transition: 'transform 0.25s ease',
+                transform: isLocationExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+              }}>
+                <ChevronDown size={16} />
+              </div>
             </div>
+          </div>
 
+          {/* Collapsible Drawer */}
+          <div style={{
+            maxHeight: isLocationExpanded ? '1000px' : '0px',
+            opacity: isLocationExpanded ? 1 : 0,
+            overflow: 'hidden',
+            transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            flex: 1,
+            marginTop: isLocationExpanded ? '0.85rem' : '0px'
+          }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {locations.map(loc => {
                 const fin = calculateLocationFinancials(loc, students);
@@ -317,23 +406,23 @@ export default function DashboardOverview({
                 );
               })}
             </div>
-          </div>
 
-          <div style={{
-            marginTop: '1rem',
-            paddingTop: '0.75rem',
-            borderTop: '1px dashed var(--border-color)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '0.82rem',
-            flexWrap: 'wrap',
-            gap: '0.4rem'
-          }}>
-            <span style={{ color: 'var(--text-secondary)' }}>مجموع خالص تمام موقعیت‌ها:</span>
-            <span style={{ fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
-              {formatToman(stats.totalTeacherNet)}
-            </span>
+            <div style={{
+              marginTop: '1rem',
+              paddingTop: '0.75rem',
+              borderTop: '1px dashed var(--border-color)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: '0.82rem',
+              flexWrap: 'wrap',
+              gap: '0.4rem'
+            }}>
+              <span style={{ color: 'var(--text-secondary)' }}>مجموع خالص تمام موقعیت‌ها:</span>
+              <span style={{ fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
+                {formatToman(stats.totalTeacherNet)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

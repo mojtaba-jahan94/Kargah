@@ -12,7 +12,9 @@ import {
   Edit3, 
   Trash2, 
   ExternalLink,
-  Users
+  Users,
+  ChevronsDown,
+  ChevronsUp
 } from 'lucide-react';
 import { toPersianDigits } from '../../utils/jalali';
 import { formatToman } from '../../utils/formatters';
@@ -38,6 +40,9 @@ export default function StudentList({
   const [levelFilter, setLevelFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'renewal', 'debt'
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+
+  // Set of expanded card IDs (defaults to all expanded or first 2)
+  const [expandedIds, setExpandedIds] = useState(() => new Set(students.map(s => s.id)));
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -65,6 +70,25 @@ export default function StudentList({
     return matchesSearch && matchesLocation && matchesLevel && matchesStatus;
   });
 
+  const toggleExpandStudent = (id) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const isAllExpanded = filteredStudents.length > 0 && filteredStudents.every(s => expandedIds.has(s.id));
+
+  const toggleAll = () => {
+    if (isAllExpanded) {
+      setExpandedIds(new Set());
+    } else {
+      setExpandedIds(new Set(students.map(s => s.id)));
+    }
+  };
+
   const handleEdit = (student) => {
     setEditingStudent(student);
     setIsModalOpen(true);
@@ -86,29 +110,29 @@ export default function StudentList({
   };
 
   return (
-    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.4rem' }}>
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Top Banner & Control Bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '0.85rem',
         background: 'var(--bg-glass)',
-        padding: '1.25rem 1.5rem',
+        padding: '1.25rem 1.4rem',
         borderRadius: '16px',
         border: '1px solid var(--border-color)',
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800 }}>
               کارت وضعیت و مدیریت هنرجویان
             </h2>
-            <span className="badge badge-amber" style={{ fontSize: '0.82rem' }}>
+            <span className="badge badge-amber" style={{ fontSize: '0.8rem' }}>
               {toPersianDigits(filteredStudents.length)} هنرجو
             </span>
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
             ثبت پرونده، رشته تخصصی هنر، تاریخچه تکالیف، شمارنده جلسات و وضعیت مالی
           </p>
         </div>
@@ -125,14 +149,14 @@ export default function StudentList({
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '0.85rem',
+        gap: '0.75rem',
         background: 'var(--bg-card)',
-        padding: '1rem 1.25rem',
+        padding: '0.85rem 1.2rem',
         borderRadius: '14px',
         border: '1px solid var(--border-color)'
       }}>
         {/* Search */}
-        <div style={{ position: 'relative', minWidth: '240px', flex: 1 }}>
+        <div style={{ position: 'relative', minWidth: '220px', flex: 1 }}>
           <Search size={16} style={{ position: 'absolute', right: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             type="text"
@@ -144,7 +168,7 @@ export default function StudentList({
         </div>
 
         {/* Location Dropdown */}
-        <div style={{ minWidth: '180px' }}>
+        <div style={{ minWidth: '170px', flex: 1 }}>
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
@@ -173,13 +197,13 @@ export default function StudentList({
         </div>
 
         {/* Status Filter Buttons */}
-        <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(0,0,0,0.2)', padding: '0.25rem', borderRadius: '10px' }}>
+        <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(0,0,0,0.2)', padding: '0.2rem', borderRadius: '10px' }}>
           <button
             onClick={() => setStatusFilter('all')}
             style={{
-              padding: '0.4rem 0.75rem',
+              padding: '0.35rem 0.65rem',
               borderRadius: '7px',
-              fontSize: '0.8rem',
+              fontSize: '0.78rem',
               fontWeight: statusFilter === 'all' ? 600 : 400,
               background: statusFilter === 'all' ? 'rgba(255,255,255,0.1)' : 'transparent',
               color: statusFilter === 'all' ? '#fff' : 'var(--text-secondary)'
@@ -190,38 +214,52 @@ export default function StudentList({
           <button
             onClick={() => setStatusFilter('renewal')}
             style={{
-              padding: '0.4rem 0.75rem',
+              padding: '0.35rem 0.65rem',
               borderRadius: '7px',
-              fontSize: '0.8rem',
+              fontSize: '0.78rem',
               fontWeight: statusFilter === 'renewal' ? 600 : 400,
               background: statusFilter === 'renewal' ? 'rgba(245, 158, 11, 0.2)' : 'transparent',
               color: statusFilter === 'renewal' ? 'var(--accent-gold)' : 'var(--text-secondary)'
             }}
           >
-            تمدید فوری
+            تمدید
           </button>
           <button
             onClick={() => setStatusFilter('debt')}
             style={{
-              padding: '0.4rem 0.75rem',
+              padding: '0.35rem 0.65rem',
               borderRadius: '7px',
-              fontSize: '0.8rem',
+              fontSize: '0.78rem',
               fontWeight: statusFilter === 'debt' ? 600 : 400,
               background: statusFilter === 'debt' ? 'rgba(244, 63, 94, 0.2)' : 'transparent',
               color: statusFilter === 'debt' ? '#fb7185' : 'var(--text-secondary)'
             }}
           >
-            دارای بدهی
+            بدهی
           </button>
         </div>
 
-        {/* View Toggle */}
-        <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(0,0,0,0.2)', padding: '0.25rem', borderRadius: '8px' }}>
+        {/* Accordion Expand All / Collapse All Toggle */}
+        {viewMode === 'grid' && (
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="btn btn-secondary"
+            style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem', minHeight: '34px' }}
+            title={isAllExpanded ? 'جمع کردن تمام کارت‌ها' : 'باز کردن تمام کارت‌ها'}
+          >
+            {isAllExpanded ? <ChevronsUp size={15} /> : <ChevronsDown size={15} />}
+            <span>{isAllExpanded ? 'جمع کردن همه' : 'باز کردن همه'}</span>
+          </button>
+        )}
+
+        {/* View Mode Toggle */}
+        <div style={{ display: 'flex', gap: '0.2rem', background: 'rgba(0,0,0,0.2)', padding: '0.2rem', borderRadius: '8px' }}>
           <button
             onClick={() => setViewMode('grid')}
             className="btn-ghost"
             style={{
-              padding: '0.4rem',
+              padding: '0.35rem',
               borderRadius: '6px',
               background: viewMode === 'grid' ? 'rgba(255,255,255,0.1)' : 'transparent',
               color: viewMode === 'grid' ? 'var(--accent-gold)' : 'var(--text-muted)'
@@ -234,7 +272,7 @@ export default function StudentList({
             onClick={() => setViewMode('table')}
             className="btn-ghost"
             style={{
-              padding: '0.4rem',
+              padding: '0.35rem',
               borderRadius: '6px',
               background: viewMode === 'table' ? 'rgba(255,255,255,0.1)' : 'transparent',
               color: viewMode === 'table' ? 'var(--accent-gold)' : 'var(--text-muted)'
@@ -250,21 +288,21 @@ export default function StudentList({
       {filteredStudents.length === 0 ? (
         <div style={{
           textAlign: 'center',
-          padding: '4rem 2rem',
+          padding: '3.5rem 1.5rem',
           background: 'var(--bg-card)',
           borderRadius: '16px',
           border: '1px solid var(--border-color)',
           color: 'var(--text-muted)'
         }}>
-          <Users size={48} style={{ opacity: 0.3, marginBottom: '0.75rem' }} />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>هنرجویی یافت نشد</h3>
-          <p style={{ fontSize: '0.85rem', marginTop: '0.35rem' }}>با تغییر عبارت جستجو یا فیلترها دوباره تلاش کنید.</p>
+          <Users size={44} style={{ opacity: 0.3, marginBottom: '0.65rem' }} />
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>هنرجویی یافت نشد</h3>
+          <p style={{ fontSize: '0.82rem', marginTop: '0.25rem' }}>با تغییر عبارت جستجو یا فیلترها دوباره تلاش کنید.</p>
         </div>
       ) : viewMode === 'grid' ? (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-          gap: '1.25rem'
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: '1rem'
         }}>
           {filteredStudents.map(student => {
             const location = locations.find(l => l.id === student.locationId);
@@ -273,6 +311,8 @@ export default function StudentList({
                 key={student.id}
                 student={student}
                 location={location}
+                isExpanded={expandedIds.has(student.id)}
+                onToggleExpand={() => toggleExpandStudent(student.id)}
                 onViewDetails={(s) => setSelectedStudentForDetail(s)}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -288,7 +328,8 @@ export default function StudentList({
           background: 'var(--bg-card)',
           borderRadius: '16px',
           border: '1px solid var(--border-color)',
-          overflowX: 'auto'
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch'
         }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '0.88rem' }}>
             <thead>

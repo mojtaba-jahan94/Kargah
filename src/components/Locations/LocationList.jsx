@@ -11,7 +11,10 @@ import {
   Trash2, 
   ExternalLink,
   WalletCards,
-  Landmark
+  Landmark,
+  ChevronDown,
+  ChevronsDown,
+  ChevronsUp
 } from 'lucide-react';
 import { toPersianDigits } from '../../utils/jalali';
 import { formatToman, formatPercent } from '../../utils/formatters';
@@ -28,7 +31,30 @@ export default function LocationList({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState(null);
 
-  const handleEdit = (loc) => {
+  // Accordion expanded state set (defaults to all expanded)
+  const [expandedLocIds, setExpandedLocIds] = useState(() => new Set(locations.map(l => l.id)));
+
+  const isAllExpanded = locations.length > 0 && locations.every(l => expandedLocIds.has(l.id));
+
+  const toggleAll = () => {
+    if (isAllExpanded) {
+      setExpandedLocIds(new Set());
+    } else {
+      setExpandedLocIds(new Set(locations.map(l => l.id)));
+    }
+  };
+
+  const toggleLocation = (id) => {
+    setExpandedLocIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleEdit = (loc, e) => {
+    e.stopPropagation();
     setEditingLocation(loc);
     setIsModalOpen(true);
   };
@@ -38,7 +64,8 @@ export default function LocationList({
     setIsModalOpen(true);
   };
 
-  const handleDelete = (loc) => {
+  const handleDelete = (loc, e) => {
+    e.stopPropagation();
     const studentCount = students.filter(s => s.locationId === loc.id).length;
     if (studentCount > 0) {
       if (!confirm(`این موقعیت دارای ${toPersianDigits(studentCount)} هنرجو است. آیا از حذف کامل آن مطمئن هستید؟`)) {
@@ -53,42 +80,56 @@ export default function LocationList({
   };
 
   return (
-    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Top Banner & Action */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '0.85rem',
         background: 'var(--bg-glass)',
-        padding: '1.25rem 1.5rem',
+        padding: '1.25rem 1.4rem',
         borderRadius: '16px',
         border: '1px solid var(--border-color)',
       }}>
         <div>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+          <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
             مدیریت موقعیت‌ها و پروفایل آموزشگاه‌ها
           </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
             دسته‌بندی کلاس‌ها به خصوصی/آنلاین، آموزشگاه‌های دارای سهم درصد، یا پلاتو با اجاره ثابت
           </p>
         </div>
 
-        <button onClick={handleCreate} className="btn btn-primary">
-          <Plus size={18} />
-          <span>افزودن موقعیت جدید</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.8rem', padding: '0.45rem 0.8rem', minHeight: '36px' }}
+          >
+            {isAllExpanded ? <ChevronsUp size={15} /> : <ChevronsDown size={15} />}
+            <span>{isAllExpanded ? 'جمع کردن همه' : 'باز کردن همه'}</span>
+          </button>
+
+          <button onClick={handleCreate} className="btn btn-primary" style={{ fontSize: '0.85rem', minHeight: '36px' }}>
+            <Plus size={17} />
+            <span>افزودن موقعیت جدید</span>
+          </button>
+        </div>
       </div>
 
-      {/* Grid of Location Cards */}
+      {/* Grid of Location Cards (Collapsible Accordion) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-        gap: '1.25rem'
+        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+        gap: '1rem'
       }}>
         {locations.map((loc) => {
           const fin = calculateLocationFinancials(loc, students);
+          const isExpanded = expandedLocIds.has(loc.id);
+
           const typeBadge = {
             private: { label: 'خصوصی / آنلاین', color: 'badge-violet' },
             academy: { label: 'آموزشگاه رسمی', color: 'badge-blue' },
@@ -100,58 +141,104 @@ export default function LocationList({
               key={loc.id} 
               className="glass-card" 
               style={{
-                padding: '1.4rem',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between',
                 position: 'relative',
                 overflow: 'hidden',
-                borderTop: `4px solid ${loc.color || 'var(--accent-amber)'}`
+                borderTop: `4px solid ${loc.color || 'var(--accent-amber)'}`,
+                transition: 'all 0.25s ease'
               }}
             >
-              <div>
-                {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.85rem' }}>
-                  <div>
-                    <span className={`badge ${typeBadge.color}`} style={{ marginBottom: '0.45rem' }}>
+              {/* Card Header Row (Clickable Accordion Trigger) */}
+              <div
+                onClick={() => toggleLocation(loc.id)}
+                style={{
+                  padding: '1.1rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.75rem',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  background: isExpanded ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
+                  borderBottom: isExpanded ? '1px solid var(--border-color)' : '1px solid transparent',
+                  transition: 'background 0.2s ease, border-color 0.2s ease'
+                }}
+              >
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.25rem' }}>
+                    <span className={`badge ${typeBadge.color}`} style={{ fontSize: '0.7rem', padding: '0.05rem 0.45rem' }}>
                       {typeBadge.label}
                     </span>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {loc.name}
-                    </h3>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      • {toPersianDigits(fin.studentCount)} هنرجو
+                    </span>
                   </div>
-
-                  <div style={{ display: 'flex', gap: '0.35rem' }}>
-                    <button
-                      onClick={() => handleEdit(loc)}
-                      className="btn-ghost"
-                      title="ویرایش موقعیت"
-                      style={{ padding: '0.4rem', borderRadius: '8px' }}
-                    >
-                      <Edit3 size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(loc)}
-                      className="btn-ghost"
-                      title="حذف موقعیت"
-                      style={{ padding: '0.4rem', borderRadius: '8px', color: 'var(--accent-rose)' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <h3 style={{ 
+                    fontSize: '1.1rem', 
+                    fontWeight: 700, 
+                    color: 'var(--text-primary)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {loc.name}
+                  </h3>
+                  <div style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600, marginTop: '0.15rem' }}>
+                    خالص دریافتی: {formatToman(fin.teacherNetEarnings)}
                   </div>
                 </div>
 
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
+                  <button
+                    onClick={(e) => handleEdit(loc, e)}
+                    className="btn-ghost"
+                    title="ویرایش موقعیت"
+                    style={{ padding: '0.35rem', borderRadius: '6px' }}
+                  >
+                    <Edit3 size={15} />
+                  </button>
+
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-secondary)',
+                    transition: 'transform 0.25s ease',
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                  }}>
+                    <ChevronDown size={18} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Accordion Drawer Body */}
+              <div style={{
+                maxHeight: isExpanded ? '600px' : '0px',
+                opacity: isExpanded ? 1 : 0,
+                overflow: 'hidden',
+                transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease',
+                padding: isExpanded ? '1.1rem 1.25rem' : '0 1.25rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.85rem'
+              }}>
                 {/* Model Tag */}
                 <div style={{
-                  padding: '0.65rem 0.85rem',
+                  padding: '0.6rem 0.8rem',
                   background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '10px',
-                  fontSize: '0.82rem',
-                  marginBottom: '1rem',
+                  fontSize: '0.8rem',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.35rem'
                 }}>
                   <span style={{ color: 'var(--text-secondary)' }}>مدل تسهیم درآمد:</span>
                   <span style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>
@@ -160,7 +247,7 @@ export default function LocationList({
                     ) : loc.type === 'private' ? (
                       '۱۰۰٪ عایدی مدرس (بدون کسر)'
                     ) : (
-                      `سهم آموزشگاه: ${formatPercent(loc.academySharePercent)} (سهم مدرس: ${formatPercent(100 - loc.academySharePercent)})`
+                      `سهم آموزشگاه: ${formatPercent(loc.academySharePercent)} (مدرس: ${formatPercent(100 - loc.academySharePercent)})`
                     )}
                   </span>
                 </div>
@@ -168,85 +255,91 @@ export default function LocationList({
                 {/* Live Financial Stats Grid */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '0.75rem',
-                  marginBottom: '1.2rem'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                  gap: '0.65rem'
                 }}>
                   <div style={{
-                    padding: '0.75rem',
+                    padding: '0.7rem',
                     background: 'rgba(255, 255, 255, 0.02)',
                     borderRadius: '10px',
                     border: '1px solid var(--border-color)'
                   }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <UserCheck size={14} />
-                      هنرجویان فعال
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <UserCheck size={13} />
+                      هنرجویان
                     </div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, marginTop: '0.2rem' }}>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '0.15rem' }}>
                       {toPersianDigits(fin.studentCount)} نفر
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      {toPersianDigits(fin.totalSessionsHeld)} جلسه برگزار شده
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      {toPersianDigits(fin.totalSessionsHeld)} جلسه
                     </div>
                   </div>
 
                   <div style={{
-                    padding: '0.75rem',
+                    padding: '0.7rem',
                     background: 'rgba(16, 185, 129, 0.08)',
                     borderRadius: '10px',
                     border: '1px solid rgba(16, 185, 129, 0.25)'
                   }}>
-                    <div style={{ fontSize: '0.75rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <Coins size={14} />
-                      خالص دریافتی مدرس
+                    <div style={{ fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Coins size={13} />
+                      خالص مدرس
                     </div>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#34d399', marginTop: '0.2rem' }}>
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: '#34d399', marginTop: '0.15rem' }}>
                       {formatToman(fin.teacherNetEarnings)}
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      کسر سهم/اجاره: {formatToman(fin.academyOrStudioCost)}
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      کسر: {formatToman(fin.academyOrStudioCost)}
                     </div>
                   </div>
                 </div>
 
                 {/* Address & Contact Details */}
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.2rem' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   {loc.address && (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
-                      <MapPin size={15} style={{ flexShrink: 0, marginTop: '2px', color: 'var(--text-muted)' }} />
+                      <MapPin size={14} style={{ flexShrink: 0, marginTop: '2px', color: 'var(--text-muted)' }} />
                       <span>{loc.address}</span>
                     </div>
                   )}
                   {loc.contact && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Phone size={15} style={{ color: 'var(--text-muted)' }} />
+                      <Phone size={14} style={{ color: 'var(--text-muted)' }} />
                       <span>{loc.contact}</span>
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* Card Footer Action */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingTop: '0.9rem',
-                borderTop: '1px solid var(--border-color)',
-                marginTop: 'auto'
-              }}>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  نرخ هر جلسه: {formatToman(loc.defaultSessionPrice)}
-                </span>
-                
-                <button
-                  onClick={() => onSelectLocationFilter(loc.id)}
-                  className="btn btn-secondary"
-                  style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-                >
-                  <ExternalLink size={14} />
-                  <span>هنرجویان ({toPersianDigits(fin.studentCount)})</span>
-                </button>
+                {/* Card Footer Actions */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingTop: '0.75rem',
+                  borderTop: '1px solid var(--border-color)',
+                  marginTop: 'auto',
+                  gap: '0.5rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <button
+                    onClick={() => onSelectLocationFilter(loc.id)}
+                    className="btn btn-secondary"
+                    style={{ flex: 1, padding: '0.45rem 0.75rem', fontSize: '0.78rem', minHeight: '34px' }}
+                  >
+                    <ExternalLink size={13} />
+                    <span>مشاهده هنرجویان ({toPersianDigits(fin.studentCount)})</span>
+                  </button>
+
+                  <button
+                    onClick={(e) => handleDelete(loc, e)}
+                    className="btn btn-danger"
+                    style={{ padding: '0.45rem 0.75rem', fontSize: '0.78rem', minHeight: '34px' }}
+                    title="حذف موقعیت"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           );

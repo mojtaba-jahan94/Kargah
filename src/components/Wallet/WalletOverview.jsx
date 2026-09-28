@@ -16,7 +16,11 @@ import {
   Clock,
   ShieldCheck,
   TrendingUp,
-  Receipt
+  Receipt,
+  ChevronDown,
+  ChevronUp,
+  ChevronsDown,
+  ChevronsUp
 } from 'lucide-react';
 import { toPersianDigits, formatJalaliReadable } from '../../utils/jalali';
 import { formatToman, formatPercent } from '../../utils/formatters';
@@ -51,6 +55,11 @@ export default function WalletOverview({
     const fin = calculateStudentFinancials(s);
     return fin.hasDebt;
   });
+
+  // Accordion drawer states for card views
+  const [expandedRenewalIds, setExpandedRenewalIds] = useState(() => new Set(renewalStudents.map(s => s.id)));
+  const [expandedDebtIds, setExpandedDebtIds] = useState(() => new Set(debtorStudents.map(s => s.id)));
+  const [expandedAcademyIds, setExpandedAcademyIds] = useState(() => new Set(locations.map(l => l.id)));
 
   const handleCopyReminder = (student, type) => {
     let msg = `سلام ${student.name} عزیز 🌺\n`;
@@ -254,65 +263,145 @@ export default function WalletOverview({
 
       {/* SUBTAB 1: ACADEMY NET SETTLEMENTS */}
       {activeSubTab === 'academies' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div style={{
-            background: 'var(--bg-card)',
-            borderRadius: '16px',
-            border: '1px solid var(--border-color)',
-            overflowX: 'auto'
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '0.88rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-secondary)' }}>
-                  <th style={{ padding: '1rem 1.25rem' }}>موقعیت / آموزشگاه</th>
-                  <th style={{ padding: '1rem 1rem' }}>مدل قرارداد</th>
-                  <th style={{ padding: '1rem 1rem' }}>جلسات برگزار شده</th>
-                  <th style={{ padding: '1rem 1rem' }}>درآمد ناخالص</th>
-                  <th style={{ padding: '1rem 1rem' }}>سهم آموزشگاه / اجاره</th>
-                  <th style={{ padding: '1rem 1.25rem', color: '#34d399' }}>خالص سهم مدرس</th>
-                  <th style={{ padding: '1rem 1.25rem', textAlign: 'left' }} className="no-print">وضعیت</th>
-                </tr>
-              </thead>
-              <tbody>
-                {locations.map(loc => {
-                  const fin = calculateLocationFinancials(loc, students);
-                  return (
-                    <tr key={loc.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <td style={{ padding: '1rem 1.25rem' }}>
-                        <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{loc.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {toPersianDigits(fin.studentCount)} هنرجوی فعال
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              گزارش عملکرد مالی و تسویه به تفکیک موقعیت و مدل‌های قرارداد:
+            </p>
+            {locations.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (expandedAcademyIds.size === locations.length) {
+                    setExpandedAcademyIds(new Set());
+                  } else {
+                    setExpandedAcademyIds(new Set(locations.map(l => l.id)));
+                  }
+                }}
+                className="btn btn-secondary"
+                style={{ fontSize: '0.78rem', padding: '0.35rem 0.7rem', minHeight: '32px' }}
+              >
+                {expandedAcademyIds.size === locations.length ? <ChevronsUp size={14} /> : <ChevronsDown size={14} />}
+                <span>{expandedAcademyIds.size === locations.length ? 'جمع کردن همه' : 'باز کردن همه'}</span>
+              </button>
+            )}
+          </div>
+
+          {/* Grid of Academy Cards with Collapsible Drawers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+            {locations.map(loc => {
+              const fin = calculateLocationFinancials(loc, students);
+              const isExpanded = expandedAcademyIds.has(loc.id);
+
+              const modelText = loc.financialModel === 'studio_rent'
+                ? `اجاره جلسه (${formatToman(loc.studioRentPerSession)})`
+                : loc.type === 'private'
+                ? '۱۰۰٪ سهم کامل مدرس'
+                : `${toPersianDigits(loc.academySharePercent)}٪ آموزشگاه / ${toPersianDigits(100 - loc.academySharePercent)}٪ مدرس`;
+
+              return (
+                <div 
+                  key={loc.id} 
+                  className="glass-card" 
+                  style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    overflow: 'hidden', 
+                    borderTop: `4px solid ${loc.color || 'var(--accent-amber)'}` 
+                  }}
+                >
+                  {/* Clickable Header for Collapsing */}
+                  <div
+                    onClick={() => {
+                      setExpandedAcademyIds(prev => {
+                        const next = new Set(prev);
+                        if (next.has(loc.id)) next.delete(loc.id);
+                        else next.add(loc.id);
+                        return next;
+                      });
+                    }}
+                    style={{
+                      padding: '1.1rem 1.25rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      background: isExpanded ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
+                      borderBottom: isExpanded ? '1px solid var(--border-color)' : '1px solid transparent',
+                      transition: 'background 0.2s ease',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 700 }}>{loc.name}</h4>
+                        <span className="badge badge-emerald" style={{ fontSize: '0.7rem' }}>آماده تسویه</span>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                        {toPersianDigits(fin.studentCount)} هنرجوی فعال • {toPersianDigits(fin.totalSessionsHeld)} جلسه برگزار شده
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0 }}>
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#34d399' }}>
+                          {formatToman(fin.teacherNetEarnings)}
                         </div>
-                      </td>
-                      <td style={{ padding: '1rem 1rem' }}>
-                        {loc.financialModel === 'studio_rent' ? (
-                          <span className="badge badge-amber">اجاره جلسه: {formatToman(loc.studioRentPerSession)}</span>
-                        ) : loc.type === 'private' ? (
-                          <span className="badge badge-violet">۱۰۰٪ بدون کسر</span>
-                        ) : (
-                          <span className="badge badge-blue">{toPersianDigits(loc.academySharePercent)}٪ آموزشگاه / {toPersianDigits(100 - loc.academySharePercent)}٪ مدرس</span>
-                        )}
-                      </td>
-                      <td style={{ padding: '1rem 1rem', fontWeight: 600 }}>
-                        {toPersianDigits(fin.totalSessionsHeld)} جلسه
-                      </td>
-                      <td style={{ padding: '1rem 1rem' }}>
-                        {formatToman(fin.grossSessionRevenue)}
-                      </td>
-                      <td style={{ padding: '1rem 1rem', color: '#fb7185' }}>
-                        {formatToman(fin.academyOrStudioCost)}
-                      </td>
-                      <td style={{ padding: '1rem 1.25rem', fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
-                        {formatToman(fin.teacherNetEarnings)}
-                      </td>
-                      <td style={{ padding: '1rem 1.25rem', textAlign: 'left' }} className="no-print">
-                        <span className="badge badge-emerald">آماده تسویه</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                          خالص مدرس
+                        </div>
+                      </div>
+                      <div style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-secondary)',
+                        transition: 'transform 0.25s ease',
+                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                      }}>
+                        <ChevronDown size={17} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Collapsible Drawer */}
+                  <div style={{
+                    maxHeight: isExpanded ? '400px' : '0px',
+                    opacity: isExpanded ? 1 : 0,
+                    overflow: 'hidden',
+                    transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease',
+                    padding: isExpanded ? '1rem 1.25rem' : '0 1.25rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem', fontSize: '0.8rem' }}>
+                      <div style={{ padding: '0.5rem 0.65rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+                        <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.72rem' }}>مدل قرارداد:</span>
+                        <span style={{ fontWeight: 600 }}>{modelText}</span>
+                      </div>
+                      <div style={{ padding: '0.5rem 0.65rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+                        <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.72rem' }}>درآمد ناخالص جلسات:</span>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{formatToman(fin.grossSessionRevenue)}</span>
+                      </div>
+                      <div style={{ padding: '0.5rem 0.65rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+                        <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.72rem' }}>سهم آموزشگاه / اجاره:</span>
+                        <span style={{ fontWeight: 600, color: '#fb7185' }}>{formatToman(fin.academyOrStudioCost)}</span>
+                      </div>
+                      <div style={{ padding: '0.5rem 0.65rem', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                        <span style={{ color: '#34d399', display: 'block', fontSize: '0.72rem' }}>خالص سهم مدرس:</span>
+                        <span style={{ fontWeight: 800, color: '#34d399' }}>{formatToman(fin.teacherNetEarnings)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -320,9 +409,28 @@ export default function WalletOverview({
       {/* SUBTAB 2: RENEWAL ALERTS */}
       {activeSubTab === 'renewals' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            هنرجویانی که بسته آنها به پایان رسیده است یا تنها ۱ جلسه تا اتمام بسته دارند:
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              هنرجویانی که بسته آنها به پایان رسیده است یا تنها ۱ جلسه تا اتمام بسته دارند:
+            </p>
+            {renewalStudents.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (expandedRenewalIds.size === renewalStudents.length) {
+                    setExpandedRenewalIds(new Set());
+                  } else {
+                    setExpandedRenewalIds(new Set(renewalStudents.map(s => s.id)));
+                  }
+                }}
+                className="btn btn-secondary"
+                style={{ fontSize: '0.78rem', padding: '0.35rem 0.7rem', minHeight: '32px' }}
+              >
+                {expandedRenewalIds.size === renewalStudents.length ? <ChevronsUp size={14} /> : <ChevronsDown size={14} />}
+                <span>{expandedRenewalIds.size === renewalStudents.length ? 'جمع کردن همه' : 'باز کردن همه'}</span>
+              </button>
+            )}
+          </div>
 
           {renewalStudents.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem', background: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
@@ -330,29 +438,77 @@ export default function WalletOverview({
               <div>هیچ هنرجویی در آستانه اتمام بسته نیست. همه بسته‌ها فعال و معتبر هستند.</div>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
               {renewalStudents.map(student => {
                 const fin = calculateStudentFinancials(student);
                 const location = locations.find(l => l.id === student.locationId);
+                const isExpanded = expandedRenewalIds.has(student.id);
 
                 return (
-                  <div key={student.id} className="glass-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.85rem', borderRight: '4px solid #f59e0b' }}>
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <h4 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{student.name}</h4>
-                          <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.2rem' }}>
-                            <span className="badge badge-amber">{student.discipline}</span>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{location?.name}</span>
-                          </div>
+                  <div key={student.id} className="glass-card" style={{ display: 'flex', flexDirection: 'column', borderRight: '4px solid #f59e0b', overflow: 'hidden' }}>
+                    {/* Header Row - Accordion Clickable Trigger */}
+                    <div 
+                      onClick={() => {
+                        setExpandedRenewalIds(prev => {
+                          const next = new Set(prev);
+                          if (next.has(student.id)) next.delete(student.id);
+                          else next.add(student.id);
+                          return next;
+                        });
+                      }}
+                      style={{
+                        padding: '1.1rem 1.25rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        background: isExpanded ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
+                        borderBottom: isExpanded ? '1px solid var(--border-color)' : '1px solid transparent',
+                        transition: 'background 0.2s ease'
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: 700 }}>{student.name}</h4>
+                          <span className="badge badge-amber" style={{ fontSize: '0.7rem' }}>{student.discipline}</span>
+                          <span className={fin.isExpired ? 'badge badge-rose' : 'badge badge-amber'} style={{ fontSize: '0.7rem' }}>
+                            {fin.isExpired ? 'پایان دوره' : '۱ جلسه مانده'}
+                          </span>
                         </div>
-
-                        <span className={fin.isExpired ? 'badge badge-rose' : 'badge badge-amber'}>
-                          {fin.isExpired ? 'پایان کامل دوره' : '۱ جلسه باقی‌مانده'}
-                        </span>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                          {location?.name} • جلسه {toPersianDigits(student.sessionsCompleted)} از {toPersianDigits(student.packageTotalSessions)}
+                        </div>
                       </div>
 
-                      <div style={{ marginTop: '0.85rem' }}>
+                      <div style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-secondary)',
+                        transition: 'transform 0.25s ease',
+                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                      }}>
+                        <ChevronDown size={17} />
+                      </div>
+                    </div>
+
+                    {/* Accordion Drawer Content */}
+                    <div style={{
+                      maxHeight: isExpanded ? '350px' : '0px',
+                      opacity: isExpanded ? 1 : 0,
+                      overflow: 'hidden',
+                      transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease',
+                      padding: isExpanded ? '1rem 1.25rem' : '0 1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.85rem'
+                    }}>
+                      <div>
                         <SessionCounter
                           total={student.packageTotalSessions}
                           completed={student.sessionsCompleted}
@@ -360,26 +516,26 @@ export default function WalletOverview({
                           showText={true}
                         />
                       </div>
-                    </div>
 
-                    <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
-                      <button
-                        onClick={() => handleCopyReminder(student, 'renewal')}
-                        className="btn btn-secondary"
-                        style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem' }}
-                      >
-                        <MessageSquare size={14} />
-                        <span>{copiedId === student.id ? 'کپی شد!' : 'پیام یادآوری'}</span>
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => handleCopyReminder(student, 'renewal')}
+                          className="btn btn-secondary"
+                          style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem', minHeight: '34px' }}
+                        >
+                          <MessageSquare size={14} />
+                          <span>{copiedId === student.id ? 'کپی شد!' : 'پیام یادآوری'}</span>
+                        </button>
 
-                      <button
-                        onClick={() => setSelectedStudentForRenew(student)}
-                        className="btn btn-primary"
-                        style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem' }}
-                      >
-                        <RefreshCw size={14} />
-                        <span>تمدید دوره جدید</span>
-                      </button>
+                        <button
+                          onClick={() => setSelectedStudentForRenew(student)}
+                          className="btn btn-primary"
+                          style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem', minHeight: '34px' }}
+                        >
+                          <RefreshCw size={14} />
+                          <span>تمدید دوره</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -393,12 +549,32 @@ export default function WalletOverview({
       {activeSubTab === 'debts' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              هنرجویانی که شهریه بسته خود را تسویه نکرده‌اند:
-            </p>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fb7185' }}>
-              مجموع کل بدهی‌های معوقه: {formatToman(globalStats.totalOutstandingDebt)}
+            <div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                هنرجویانی که شهریه بسته خود را تسویه نکرده‌اند:
+              </p>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#fb7185', marginTop: '0.2rem' }}>
+                مجموع کل بدهی‌های معوقه: {formatToman(globalStats.totalOutstandingDebt)}
+              </div>
             </div>
+
+            {debtorStudents.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (expandedDebtIds.size === debtorStudents.length) {
+                    setExpandedDebtIds(new Set());
+                  } else {
+                    setExpandedDebtIds(new Set(debtorStudents.map(s => s.id)));
+                  }
+                }}
+                className="btn btn-secondary"
+                style={{ fontSize: '0.78rem', padding: '0.35rem 0.7rem', minHeight: '32px' }}
+              >
+                {expandedDebtIds.size === debtorStudents.length ? <ChevronsUp size={14} /> : <ChevronsDown size={14} />}
+                <span>{expandedDebtIds.size === debtorStudents.length ? 'جمع کردن همه' : 'باز کردن همه'}</span>
+              </button>
+            )}
           </div>
 
           {debtorStudents.length === 0 ? (
@@ -407,78 +583,129 @@ export default function WalletOverview({
               <div>هیچ بدهی معوقه‌ای وجود ندارد! حساب تمام هنرجویان تسویه است.</div>
             </div>
           ) : (
-            <div style={{
-              background: 'var(--bg-card)',
-              borderRadius: '16px',
-              border: '1px solid var(--border-color)',
-              overflowX: 'auto'
-            }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '0.88rem' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)', color: 'var(--text-secondary)' }}>
-                    <th style={{ padding: '0.9rem 1.25rem' }}>هنرجوی بدهکار</th>
-                    <th style={{ padding: '0.9rem 1rem' }}>موقعیت / آموزشگاه</th>
-                    <th style={{ padding: '0.9rem 1rem' }}>شهریه کل دوره</th>
-                    <th style={{ padding: '0.9rem 1rem' }}>پرداخت شده</th>
-                    <th style={{ padding: '0.9rem 1rem', color: '#fb7185' }}>مانده بدهی معوقه</th>
-                    <th style={{ padding: '0.9rem 1.25rem', textAlign: 'left' }}>اقدام سریع</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {debtorStudents.map(student => {
-                    const fin = calculateStudentFinancials(student);
-                    const location = locations.find(l => l.id === student.locationId);
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+              {debtorStudents.map(student => {
+                const fin = calculateStudentFinancials(student);
+                const location = locations.find(l => l.id === student.locationId);
+                const isExpanded = expandedDebtIds.has(student.id);
 
-                    return (
-                      <tr key={student.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={{ padding: '0.9rem 1.25rem' }}>
-                          <div style={{ fontWeight: 700 }}>{student.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            {student.discipline} - تلفن: {toPersianDigits(student.phone)}
-                          </div>
-                        </td>
-                        <td style={{ padding: '0.9rem 1rem' }}>
-                          {location?.name}
-                        </td>
-                        <td style={{ padding: '0.9rem 1rem' }}>
-                          {formatToman(student.packageFee)}
-                        </td>
-                        <td style={{ padding: '0.9rem 1rem', color: '#34d399' }}>
-                          {formatToman(student.paidAmount)}
-                        </td>
-                        <td style={{ padding: '0.9rem 1rem', fontWeight: 800, color: '#fb7185' }}>
-                          {formatToman(fin.debt)}
-                        </td>
-                        <td style={{ padding: '0.9rem 1.25rem', textAlign: 'left' }}>
-                          <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
-                            <button
-                              onClick={() => handleCopyReminder(student, 'debt')}
-                              className="btn btn-secondary"
-                              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
-                              title="کپی پیامک اخطار تسویه بدهی"
-                            >
-                              <MessageSquare size={14} />
-                              <span>{copiedId === student.id ? 'کپی شد!' : 'یادآوری'}</span>
-                            </button>
+                return (
+                  <div 
+                    key={student.id} 
+                    className="glass-card" 
+                    style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      borderRight: '4px solid #f43f5e', 
+                      overflow: 'hidden' 
+                    }}
+                  >
+                    {/* Header Row - Accordion Clickable Trigger */}
+                    <div
+                      onClick={() => {
+                        setExpandedDebtIds(prev => {
+                          const next = new Set(prev);
+                          if (next.has(student.id)) next.delete(student.id);
+                          else next.add(student.id);
+                          return next;
+                        });
+                      }}
+                      style={{
+                        padding: '1.1rem 1.25rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        background: isExpanded ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
+                        borderBottom: isExpanded ? '1px solid var(--border-color)' : '1px solid transparent',
+                        transition: 'background 0.2s ease',
+                        gap: '0.5rem'
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: 700 }}>{student.name}</h4>
+                          <span className="badge badge-amber" style={{ fontSize: '0.7rem' }}>{student.discipline}</span>
+                          <span className="badge badge-rose" style={{ fontSize: '0.7rem' }}>
+                            بدهی: {formatToman(fin.debt)}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                          {location?.name} • تلفن: {toPersianDigits(student.phone)}
+                        </div>
+                      </div>
 
-                            <button
-                              onClick={() => {
-                                setSelectedStudentForPay(student);
-                                setIsPaymentModalOpen(true);
-                              }}
-                              className="btn btn-success"
-                              style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
-                            >
-                              <Wallet size={14} />
-                              <span>ثبت دریافت</span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      <div style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-secondary)',
+                        transition: 'transform 0.25s ease',
+                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                        flexShrink: 0
+                      }}>
+                        <ChevronDown size={17} />
+                      </div>
+                    </div>
+
+                    {/* Accordion Drawer Content */}
+                    <div style={{
+                      maxHeight: isExpanded ? '400px' : '0px',
+                      opacity: isExpanded ? 1 : 0,
+                      overflow: 'hidden',
+                      transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.25s ease',
+                      padding: isExpanded ? '1rem 1.25rem' : '0 1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.85rem'
+                    }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
+                        <div style={{ padding: '0.5rem 0.4rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>شهریه کل:</div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }}>{formatToman(student.packageFee)}</div>
+                        </div>
+                        <div style={{ padding: '0.5rem 0.4rem', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>پرداخت شده:</div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399', marginTop: '0.15rem' }}>{formatToman(student.paidAmount)}</div>
+                        </div>
+                        <div style={{ padding: '0.5rem 0.4rem', borderRadius: '8px', background: 'rgba(244, 63, 94, 0.08)', border: '1px solid rgba(244, 63, 94, 0.25)' }}>
+                          <div style={{ fontSize: '0.7rem', color: '#fb7185' }}>مانده بدهی:</div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fb7185', marginTop: '0.15rem' }}>{formatToman(fin.debt)}</div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => handleCopyReminder(student, 'debt')}
+                          className="btn btn-secondary"
+                          style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem', minHeight: '34px' }}
+                          title="کپی پیامک اخطار تسویه بدهی"
+                        >
+                          <MessageSquare size={14} />
+                          <span>{copiedId === student.id ? 'کپی شد!' : 'پیام اخطار تسویه'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setSelectedStudentForPay(student);
+                            setIsPaymentModalOpen(true);
+                          }}
+                          className="btn btn-success"
+                          style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem', minHeight: '34px' }}
+                        >
+                          <Wallet size={14} />
+                          <span>ثبت دریافت شهریه</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
