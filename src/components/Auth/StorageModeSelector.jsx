@@ -178,12 +178,13 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
             </button>
           </div>
 
-          {/* Sync Action Button */}
+          {/* Sync Action Button - hidden on mobile for tidiness */}
           <button
             type="button"
             onClick={handlePushToServer}
             disabled={syncStatus === 'syncing'}
             title="همگام‌سازی و ذخیره آنی در سرور"
+            className="hide-on-mobile"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -225,7 +226,8 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
               color: 'var(--text-primary)',
               fontSize: '0.82rem',
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              minHeight: '32px'
             }}
           >
             <div style={{
@@ -242,10 +244,10 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
             }}>
               {(user?.fullName || user?.username || 'ک')[0]}
             </div>
-            <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span className="hide-on-mobile" style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.fullName || user?.username}
             </span>
-            <ChevronDown size={14} color="var(--text-muted)" />
+            <ChevronDown className="hide-on-mobile" size={14} color="var(--text-muted)" />
           </button>
 
           {/* User Menu Dropdown */}
@@ -256,6 +258,7 @@ export function StorageModeSelector({ currentAppData, onApplyServerData }) {
                 top: 'calc(100% + 8px)',
                 left: 0,
                 width: '260px',
+                maxWidth: 'calc(100vw - 1.5rem)',
                 backgroundColor: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '12px',

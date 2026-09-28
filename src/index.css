@@ -342,8 +342,26 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
+.navbar-header {
+  padding: 0.75rem 1.5rem;
+}
+
 /* Mobile Screens (Phone & Small Tablets) */
 @media (max-width: 768px) {
+  .navbar-header {
+    padding: 0.45rem 0.75rem !important;
+  }
+
+  .navbar-brand-icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 9px !important;
+  }
+
+  .navbar-brand-title {
+    font-size: 1.05rem !important;
+  }
+
   .desktop-nav {
     display: none !important;
   }

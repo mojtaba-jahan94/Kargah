@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { 
-  Palette, 
   LayoutDashboard, 
   MapPin, 
   Users, 
@@ -9,11 +8,12 @@ import {
   Download, 
   Upload, 
   Moon, 
-  Sun,
-  Bell,
-  Sparkles,
-  Settings
+  Sun, 
+  Bell, 
+  Sparkles, 
+  Settings 
 } from 'lucide-react';
+import { PaintingIcon } from './Common/PaintingIcon';
 import { toPersianDigits } from '../utils/jalali';
 import { StorageModeSelector } from './Auth/StorageModeSelector';
 
@@ -81,7 +81,7 @@ export default function Navbar({
   return (
     <>
       {/* Top Header */}
-      <header style={{
+      <header className="navbar-header" style={{
         position: 'sticky',
         top: 0,
         zIndex: 100,
@@ -89,7 +89,6 @@ export default function Navbar({
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border-color)',
-        padding: '0.75rem 1.5rem',
         transition: 'all var(--transition-normal)'
       }}>
         <div style={{
@@ -99,35 +98,35 @@ export default function Navbar({
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'nowrap',
-          gap: '0.75rem'
+          gap: '0.6rem'
         }}>
           {/* Brand & Identity */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #f59e0b 0%, #8b5cf6 100%)',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0 }}>
+            <div className="navbar-brand-icon" style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '11px',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.45)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
-              boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)',
-              transform: 'rotate(-4deg)',
+              boxShadow: '0 4px 14px rgba(245, 158, 11, 0.2)',
               flexShrink: 0
             }}>
-              <Palette size={22} style={{ transform: 'rotate(4deg)' }} />
+              <PaintingIcon size={22} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                <h1 style={{ 
+                <h1 className="navbar-brand-title" style={{ 
                   fontSize: '1.2rem', 
                   fontWeight: 800, 
                   letterSpacing: '-0.02em',
                   background: 'linear-gradient(135deg, #f8fafc 30%, #fbbf24 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  display: 'inline-block'
+                  display: 'inline-block',
+                  margin: 0
                 }}>
                   کارگاه
                 </h1>
@@ -224,20 +223,20 @@ export default function Navbar({
               onApplyServerData={onApplyServerData} 
             />
 
-            {/* Backup / Export */}
+            {/* Backup / Export (Desktop only - accessible via Settings on mobile) */}
             <button
               onClick={onExport}
-              className="btn btn-secondary"
+              className="btn btn-secondary hide-on-mobile"
               title="پشتیبان‌گیری از اطلاعات (Export JSON)"
               style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <Download size={14} />
             </button>
 
-            {/* Import */}
+            {/* Import (Desktop only - accessible via Settings on mobile) */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="btn btn-secondary"
+              className="btn btn-secondary hide-on-mobile"
               title="بازیابی اطلاعات از فایل (Import JSON)"
               style={{ padding: '0.45rem', minHeight: '32px', minWidth: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
