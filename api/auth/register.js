@@ -1,8 +1,15 @@
 import bcrypt from 'bcryptjs';
-import { getTursoClient, initDatabase, createAuthToken, readRequestBody } from '../lib/turso.js';
+import { 
+  getDatabase, 
+  initDatabase, 
+  findUserByUsernameOrEmail, 
+  createUser, 
+  saveUserData, 
+  createAuthToken, 
+  readRequestBody 
+} from '../lib/db.js';
 
 export default async function handler(req, res) {
-  // CORS & Methods
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -11,11 +18,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'METHOD_NOT_ALLOWED', message: 'فقط متد POST مجاز است.' });
   }
 
-  const client = getTursoClient();
-  if (!client) {
+  const db = getDatabase();
+  if (!db) {
     return res.status(503).json({
-      error: 'TURSO_NOT_CONFIGURED',
-      message: 'پایگاه داده Turso هنوز روی سرور ورسل تنظیم نشده است. لطفاً مقادیر TURSO_DATABASE_URL و TURSO_AUTH_TOKEN را در متغیرهای محیطی Vercel قرار دهید.'
+      error: 'DATABASE_NOT_CONFIGURED',
+      message: 'پایگاه داده هنوز متصل نشده است. در پنل Vercel وارد تب Storage شوید و روی Create Database کلیک کنید.'
     });
   }
 
@@ -37,13 +44,9 @@ export default async function handler(req, res) {
     }
 
     // Check if user already exists
-    const existing = await client.execute({
-      sql: 'SELECT id FROM users WHERE username = ? OR (email IS NOT NULL AND email = ?)',
-      args: [cleanUsername, email ? email.trim().toLowerCase() : '']
-    });
-
-    if (existing.rows.length > 0) {
-      return res.status(409).json({ error: 'USER_EXISTS', message: 'کاربری با این نام کاربری یا ایمیل قبلاً ثبت‌نام کرده است.' });
+    const existing = await findUserByUsernameOrEmail(cleanUsername);
+    if (existing) {
+      return res.status(409).json({ error: 'USER_EXISTS', message: 'کاربری با این نام کاربری قبلاً ثبت‌نام کرده است.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -51,16 +54,13 @@ export default async function handler(req, res) {
     const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const nowIso = new Date().toISOString();
 
-    await client.execute({
-      sql: 'INSERT INTO users (id, username, email, password_hash, full_name, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      args: [
-        userId,
-        cleanUsername,
-        email ? email.trim().toLowerCase() : null,
-        passwordHash,
-        fullName ? fullName.trim() : cleanUsername,
-        nowIso
-      ]
+    await createUser({
+      id: userId,
+      username: cleanUsername,
+      email: email ? email.trim().toLowerCase() : null,
+      passwordHash,
+      fullName: fullName ? fullName.trim() : cleanUsername,
+      createdAt: nowIso
     });
 
     // Save initial data if provided
@@ -69,10 +69,12 @@ export default async function handler(req, res) {
     const paymentsJson = JSON.stringify(initialData?.payments || []);
     const settingsJson = JSON.stringify(initialData?.settings || {});
 
-    await client.execute({
-      sql: `INSERT INTO user_data (user_id, locations_json, students_json, payments_json, settings_json, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [userId, locationsJson, studentsJson, paymentsJson, settingsJson, nowIso]
+    await saveUserData(userId, {
+      locationsJson,
+      studentsJson,
+      paymentsJson,
+      settingsJson,
+      updatedAt: nowIso
     });
 
     const userObj = {

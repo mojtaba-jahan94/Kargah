@@ -1,4 +1,11 @@
-import { getTursoClient, verifyAuthToken, readRequestBody, initDatabase } from './lib/turso.js';
+import { 
+  getDatabase, 
+  initDatabase, 
+  getUserData, 
+  saveUserData, 
+  verifyAuthToken, 
+  readRequestBody 
+} from './lib/db.js';
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -13,27 +20,23 @@ export default async function handler(req, res) {
     });
   }
 
-  const client = getTursoClient();
-  if (!client) {
+  const db = getDatabase();
+  if (!db) {
     return res.status(503).json({
-      error: 'TURSO_NOT_CONFIGURED',
-      message: 'پایگاه داده Turso هنوز روی سرور ورسل متصل نشده است. متغیرهای TURSO_DATABASE_URL و TURSO_AUTH_TOKEN را در Vercel ثبت نمایید.'
+      error: 'DATABASE_NOT_CONFIGURED',
+      message: 'پایگاه داده هنوز متصل نشده است. در پنل Vercel وارد تب Storage شوید و روی Create Database کلیک کنید.'
     });
   }
 
   const userId = payload.userId;
 
-  // GET: Fetch user data from Turso
+  // GET: Fetch user data
   if (req.method === 'GET') {
     try {
       await initDatabase();
-      const result = await client.execute({
-        sql: 'SELECT locations_json, students_json, payments_json, settings_json, updated_at FROM user_data WHERE user_id = ? LIMIT 1',
-        args: [userId]
-      });
+      const row = await getUserData(userId);
 
-      if (result.rows.length === 0) {
-        // No server data yet for this user
+      if (!row) {
         return res.status(200).json({
           found: false,
           locations: null,
@@ -45,7 +48,6 @@ export default async function handler(req, res) {
         });
       }
 
-      const row = result.rows[0];
       return res.status(200).json({
         found: true,
         locations: JSON.parse(row.locations_json || '[]'),
@@ -60,7 +62,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // POST or PUT: Save/Sync user data to Turso
+  // POST or PUT: Save/Sync user data
   if (req.method === 'POST' || req.method === 'PUT') {
     try {
       await initDatabase();
@@ -73,24 +75,17 @@ export default async function handler(req, res) {
       const settingsJson = JSON.stringify(settings || {});
       const nowIso = new Date().toISOString();
 
-      // SQLite UPSERT syntax
-      await client.execute({
-        sql: `
-          INSERT INTO user_data (user_id, locations_json, students_json, payments_json, settings_json, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?)
-          ON CONFLICT(user_id) DO UPDATE SET
-            locations_json = excluded.locations_json,
-            students_json = excluded.students_json,
-            payments_json = excluded.payments_json,
-            settings_json = excluded.settings_json,
-            updated_at = excluded.updated_at
-        `,
-        args: [userId, locationsJson, studentsJson, paymentsJson, settingsJson, nowIso]
+      await saveUserData(userId, {
+        locationsJson,
+        studentsJson,
+        paymentsJson,
+        settingsJson,
+        updatedAt: nowIso
       });
 
       return res.status(200).json({
         success: true,
-        message: 'اطلاعات با موفقیت روی سرور (Turso) ذخیره و همگام شد.',
+        message: 'اطلاعات با موفقیت روی سرور ذخیره و همگام شد.',
         updatedAt: nowIso
       });
     } catch (err) {

@@ -1,5 +1,11 @@
 import bcrypt from 'bcryptjs';
-import { getTursoClient, initDatabase, createAuthToken, readRequestBody } from '../lib/turso.js';
+import { 
+  getDatabase, 
+  initDatabase, 
+  findUserByUsernameOrEmail, 
+  createAuthToken, 
+  readRequestBody 
+} from '../lib/db.js';
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -10,11 +16,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'METHOD_NOT_ALLOWED', message: 'فقط متد POST مجاز است.' });
   }
 
-  const client = getTursoClient();
-  if (!client) {
+  const db = getDatabase();
+  if (!db) {
     return res.status(503).json({
-      error: 'TURSO_NOT_CONFIGURED',
-      message: 'پایگاه داده Turso هنوز روی سرور ورسل تنظیم نشده است. لطفاً متغیرهای TURSO_DATABASE_URL و TURSO_AUTH_TOKEN را در تنظیمات Vercel اضافه کنید.'
+      error: 'DATABASE_NOT_CONFIGURED',
+      message: 'پایگاه داده هنوز متصل نشده است. در پنل Vercel وارد تب Storage شوید و روی Create Database کلیک کنید.'
     });
   }
 
@@ -31,27 +37,21 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'MISSING_FIELDS', message: 'لطفاً نام کاربری و رمز عبور را وارد کنید.' });
     }
 
-    const result = await client.execute({
-      sql: 'SELECT id, username, email, password_hash, full_name FROM users WHERE username = ? OR email = ? LIMIT 1',
-      args: [cleanUsername, cleanUsername]
-    });
-
-    if (result.rows.length === 0) {
+    const user = await findUserByUsernameOrEmail(cleanUsername);
+    if (!user) {
       return res.status(401).json({ error: 'INVALID_CREDENTIALS', message: 'نام کاربری یا رمز عبور اشتباه است.' });
     }
 
-    const row = result.rows[0];
-    const passwordMatch = await bcrypt.compare(cleanPassword, row.password_hash);
-
+    const passwordMatch = await bcrypt.compare(cleanPassword, user.password_hash);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'INVALID_CREDENTIALS', message: 'نام کاربری یا رمز عبور اشتباه است.' });
     }
 
     const userObj = {
-      id: row.id,
-      username: row.username,
-      fullName: row.full_name || row.username,
-      email: row.email || ''
+      id: user.id,
+      username: user.username,
+      fullName: user.full_name || user.username,
+      email: user.email || ''
     };
 
     const token = createAuthToken(userObj);
