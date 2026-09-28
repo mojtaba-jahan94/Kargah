@@ -19,7 +19,6 @@ import {
 import { toPersianDigits, getTodayJalaliString, getTodayDayOfWeek } from '../../utils/jalali';
 import { formatToman, formatPercent } from '../../utils/formatters';
 import { calculateGlobalStats, calculateStudentFinancials, calculateLocationFinancials } from '../../utils/finance';
-import { SessionCounter } from '../Common/SessionCounter';
 
 export default function DashboardOverview({ 
   locations, 
@@ -38,85 +37,66 @@ export default function DashboardOverview({
   const urgentDebtors = students.filter(s => calculateStudentFinancials(s).hasDebt);
 
   return (
-    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.6rem' }}>
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Welcome Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(16, 185, 129, 0.1) 100%)',
-        border: '1px solid var(--border-highlight)',
-        borderRadius: '20px',
-        padding: '1.6rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '1.2rem',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', fontWeight: 600 }}>
+      <div className="dashboard-welcome-banner">
+        <div style={{ zIndex: 1, maxWidth: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.82rem', color: 'var(--accent-gold)', fontWeight: 600 }}>
               {dayOfWeek}، {toPersianDigits(todayDate)}
             </span>
             <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--text-muted)' }} />
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               آتلیه و کارگاه هنری فعال
             </span>
           </div>
 
-          <h2 style={{ fontSize: '1.65rem', fontWeight: 900, marginTop: '0.35rem', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginTop: '0.35rem', letterSpacing: '-0.02em' }}>
             سامانه هوشمند مدیریت کلاس‌های هنری
           </h2>
-          <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', maxWidth: '620px', marginTop: '0.3rem', lineHeight: 1.6 }}>
-            مدیریت یکپارچه شاگردان خصوصی، آموزشگاه‌ها با درصد سهم، پلاتو، حضور و غیاب کسر از بسته، و کیف پول شفاف استاد.
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', maxWidth: '600px', marginTop: '0.25rem', lineHeight: 1.5 }}>
+            مدیریت یکپارچه شاگردان خصوصی، آموزشگاه‌ها با درصد سهم، پلاتو، حضور و غیاب کسر از بسته و کیف پول شفاف استاد.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', zIndex: 1 }}>
+        <div className="dashboard-banner-actions">
           <button
             onClick={() => onNavigateTab('attendance')}
             className="btn btn-primary"
-            style={{ padding: '0.7rem 1.25rem', fontSize: '0.92rem' }}
           >
-            <CalendarCheck2 size={18} />
+            <CalendarCheck2 size={17} />
             <span>حضور و غیاب امروز</span>
           </button>
           <button
             onClick={() => onNavigateTab('wallet')}
             className="btn btn-secondary"
-            style={{ padding: '0.7rem 1.25rem', fontSize: '0.92rem' }}
           >
-            <Wallet size={18} />
+            <Wallet size={17} />
             <span>کیف پول و تسویه</span>
           </button>
         </div>
       </div>
 
-      {/* Primary KPI Row */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1.1rem'
-      }}>
+      {/* Primary KPI Row - 2x2 on Mobile, 4x1 on Desktop */}
+      <div className="dashboard-kpi-grid">
         {/* KPI 1: Active Students */}
         <div 
           className="glass-card" 
           onClick={() => onNavigateTab('students')}
-          style={{ padding: '1.25rem', cursor: 'pointer' }}
+          style={{ padding: '1.1rem', cursor: 'pointer' }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-            <span>کل هنرجویان فعال</span>
-            <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa' }}>
-              <Users size={16} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
+            <span>هنرجویان فعال</span>
+            <div style={{ padding: '0.35rem', borderRadius: '8px', background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa' }}>
+              <Users size={15} />
             </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--text-primary)' }}>
+          <div className="dashboard-kpi-value" style={{ fontSize: '1.5rem', fontWeight: 900, marginTop: '0.4rem', color: 'var(--text-primary)' }}>
             {toPersianDigits(stats.totalStudents)} نفر
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            <span>در {toPersianDigits(stats.totalLocations)} آموزشگاه و موقعیت</span>
-            <ArrowRight size={12} style={{ transform: 'rotate(180deg)' }} />
+          <div className="dashboard-kpi-subtext" style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span>{toPersianDigits(stats.totalLocations)} موقعیت</span>
+            <ArrowRight size={11} style={{ transform: 'rotate(180deg)' }} />
           </div>
         </div>
 
@@ -124,19 +104,24 @@ export default function DashboardOverview({
         <div 
           className="glass-card" 
           onClick={() => onNavigateTab('wallet')}
-          style={{ padding: '1.25rem', cursor: 'pointer', border: '1px solid rgba(16, 185, 129, 0.35)', background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(22, 30, 49, 0.85) 100%)' }}
+          style={{ 
+            padding: '1.1rem', 
+            cursor: 'pointer', 
+            border: '1px solid rgba(16, 185, 129, 0.35)', 
+            background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(22, 30, 49, 0.88) 100%)' 
+          }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#34d399', fontSize: '0.82rem' }}>
-            <span style={{ fontWeight: 700 }}>خالص دریافتی مدرس</span>
-            <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>
-              <Coins size={16} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#34d399', fontSize: '0.78rem' }}>
+            <span style={{ fontWeight: 700 }}>خالص دریافتی</span>
+            <div style={{ padding: '0.35rem', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>
+              <Coins size={15} />
             </div>
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, marginTop: '0.5rem', color: '#34d399' }}>
+          <div className="dashboard-kpi-value" style={{ fontSize: '1.4rem', fontWeight: 900, marginTop: '0.4rem', color: '#34d399' }}>
             {formatToman(stats.totalTeacherNet)}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-            پس از کسر {formatToman(stats.totalAcademyStudioShare)} سهم آموزشگاه‌ها
+          <div className="dashboard-kpi-subtext" style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+            کسورات: {formatToman(stats.totalAcademyStudioShare)}
           </div>
         </div>
 
@@ -144,19 +129,23 @@ export default function DashboardOverview({
         <div 
           className="glass-card" 
           onClick={() => onNavigateTab('wallet')}
-          style={{ padding: '1.25rem', cursor: 'pointer', border: stats.totalRenewalAlerts > 0 ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid var(--border-color)' }}
+          style={{ 
+            padding: '1.1rem', 
+            cursor: 'pointer', 
+            border: stats.totalRenewalAlerts > 0 ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid var(--border-color)' 
+          }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
             <span>هشدار تمدید بسته</span>
-            <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-gold)' }}>
-              <Sparkles size={16} />
+            <div style={{ padding: '0.35rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-gold)' }}>
+              <Sparkles size={15} />
             </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, marginTop: '0.5rem', color: stats.totalRenewalAlerts > 0 ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
+          <div className="dashboard-kpi-value" style={{ fontSize: '1.5rem', fontWeight: 900, marginTop: '0.4rem', color: stats.totalRenewalAlerts > 0 ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
             {toPersianDigits(stats.totalRenewalAlerts)} هنرجو
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-            جلسه آخر یا پایان بسته آموزشی
+          <div className="dashboard-kpi-subtext" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            جلسه پایانی یا پایان بسته
           </div>
         </div>
 
@@ -164,70 +153,68 @@ export default function DashboardOverview({
         <div 
           className="glass-card" 
           onClick={() => onNavigateTab('wallet')}
-          style={{ padding: '1.25rem', cursor: 'pointer', border: stats.totalOutstandingDebt > 0 ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid var(--border-color)' }}
+          style={{ 
+            padding: '1.1rem', 
+            cursor: 'pointer', 
+            border: stats.totalOutstandingDebt > 0 ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid var(--border-color)' 
+          }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
             <span>بدهی‌های معوقه</span>
-            <div style={{ padding: '0.4rem', borderRadius: '8px', background: 'rgba(244, 63, 94, 0.15)', color: '#fb7185' }}>
-              <AlertCircle size={16} />
+            <div style={{ padding: '0.35rem', borderRadius: '8px', background: 'rgba(244, 63, 94, 0.15)', color: '#fb7185' }}>
+              <AlertCircle size={15} />
             </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, marginTop: '0.5rem', color: stats.totalOutstandingDebt > 0 ? '#fb7185' : 'var(--text-primary)' }}>
+          <div className="dashboard-kpi-value" style={{ fontSize: '1.4rem', fontWeight: 900, marginTop: '0.4rem', color: stats.totalOutstandingDebt > 0 ? '#fb7185' : 'var(--text-primary)' }}>
             {formatToman(stats.totalOutstandingDebt)}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+          <div className="dashboard-kpi-subtext" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
             {toPersianDigits(stats.totalDebtorsCount)} هنرجو با مانده بدهی
           </div>
         </div>
       </div>
 
-      {/* Two Column Layout: Urgent Alerts & Academy Performance */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.4rem' }}>
+      {/* Two Column Layout: Urgent Alerts & Academy Performance (Stacks to 1 Column on Mobile) */}
+      <div className="dashboard-grid-main">
         {/* Left Column: Urgent Actions & Renewal List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{
             background: 'var(--bg-card)',
             borderRadius: '16px',
             border: '1px solid var(--border-color)',
-            padding: '1.25rem'
+            padding: '1.15rem'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <ShieldAlert size={18} color="var(--accent-gold)" />
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>اقدامات و هشدارهای نیازمند پیگیری</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <ShieldAlert size={17} color="var(--accent-gold)" />
+                <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>اقدامات و هشدارهای نیازمند پیگیری</h3>
               </div>
               <button 
                 onClick={() => onNavigateTab('wallet')} 
                 className="btn btn-ghost"
-                style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                style={{ fontSize: '0.78rem', padding: '0.2rem 0.45rem', minHeight: '30px' }}
               >
                 مشاهده همه
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {urgentRenewals.length === 0 && urgentDebtors.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  هیچ هشدار فوری وجود ندارد.
+                </div>
+              )}
+
               {urgentRenewals.slice(0, 3).map(student => {
                 const fin = calculateStudentFinancials(student);
                 return (
-                  <div
-                    key={student.id}
-                    style={{
-                      padding: '0.85rem 1rem',
-                      borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid var(--border-color)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '0.75rem'
-                    }}
-                  >
+                  <div key={student.id} className="dashboard-alert-item">
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                         <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{student.name}</span>
                         <span className="badge badge-amber" style={{ fontSize: '0.7rem' }}>{student.discipline}</span>
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                         {toPersianDigits(student.sessionsCompleted)} از {toPersianDigits(student.packageTotalSessions)} جلسه برگزار شده ({fin.isExpired ? 'پایان بسته' : '۱ جلسه مانده'})
                       </div>
                     </div>
@@ -235,7 +222,7 @@ export default function DashboardOverview({
                     <button
                       onClick={() => onSelectStudent(student)}
                       className="btn btn-secondary"
-                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', minHeight: '32px' }}
                     >
                       بررسی و تمدید
                     </button>
@@ -246,27 +233,15 @@ export default function DashboardOverview({
               {urgentDebtors.slice(0, 2).map(student => {
                 const fin = calculateStudentFinancials(student);
                 return (
-                  <div
-                    key={student.id}
-                    style={{
-                      padding: '0.85rem 1rem',
-                      borderRadius: '12px',
-                      background: 'rgba(244, 63, 94, 0.04)',
-                      border: '1px solid rgba(244, 63, 94, 0.2)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '0.75rem'
-                    }}
-                  >
+                  <div key={student.id} className="dashboard-alert-item" style={{ background: 'rgba(244, 63, 94, 0.04)', borderColor: 'rgba(244, 63, 94, 0.2)' }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                         <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{student.name}</span>
                         <span className="badge badge-rose" style={{ fontSize: '0.7rem' }}>
                           بدهی: {formatToman(fin.debt)}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                         شهریه {student.discipline} | تلفن: {toPersianDigits(student.phone)}
                       </div>
                     </div>
@@ -274,7 +249,7 @@ export default function DashboardOverview({
                     <button
                       onClick={() => onSelectStudent(student)}
                       className="btn btn-secondary"
-                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', minHeight: '32px' }}
                     >
                       تسویه بدهی
                     </button>
@@ -290,58 +265,50 @@ export default function DashboardOverview({
           background: 'var(--bg-card)',
           borderRadius: '16px',
           border: '1px solid var(--border-color)',
-          padding: '1.25rem',
+          padding: '1.15rem',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between'
         }}>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Building2 size={18} color="#60a5fa" />
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>سهم و خالص دریافتی آموزشگاه‌ها</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Building2 size={17} color="#60a5fa" />
+                <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>سهم و خالص دریافتی آموزشگاه‌ها</h3>
               </div>
               <button 
                 onClick={() => onNavigateTab('locations')} 
                 className="btn btn-ghost"
-                style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                style={{ fontSize: '0.78rem', padding: '0.2rem 0.45rem', minHeight: '30px' }}
               >
                 مدیریت موقعیت‌ها
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {locations.map(loc => {
                 const fin = calculateLocationFinancials(loc, students);
                 const shareModelText = loc.financialModel === 'studio_rent'
-                  ? `اجاره ثابت پلاتو (${formatToman(loc.studioRentPerSession)}/جلسه)`
+                  ? `اجاره ثابت (${formatToman(loc.studioRentPerSession)}/جلسه)`
                   : loc.type === 'private'
                   ? '۱۰۰٪ عایدی مدرس'
-                  : `سهم آموزشگاه: ${toPersianDigits(loc.academySharePercent)}٪`;
+                  : `سهم: ${toPersianDigits(loc.academySharePercent)}٪`;
 
                 return (
-                  <div
-                    key={loc.id}
-                    style={{
-                      padding: '0.85rem',
-                      borderRadius: '10px',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid var(--border-color)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div key={loc.id} className="dashboard-location-item">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.4rem' }}>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.92rem' }}>{loc.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.88rem' }}>{loc.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
                           {shareModelText} | {toPersianDigits(fin.studentCount)} هنرجو
                         </div>
                       </div>
 
                       <div style={{ textAlign: 'left' }}>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#34d399' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#34d399' }}>
                           {formatToman(fin.teacherNetEarnings)}
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
                           خالص مدرس
                         </div>
                       </div>
@@ -353,16 +320,18 @@ export default function DashboardOverview({
           </div>
 
           <div style={{
-            marginTop: '1.25rem',
-            paddingTop: '0.85rem',
+            marginTop: '1rem',
+            paddingTop: '0.75rem',
             borderTop: '1px dashed var(--border-color)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            fontSize: '0.85rem'
+            fontSize: '0.82rem',
+            flexWrap: 'wrap',
+            gap: '0.4rem'
           }}>
-            <span style={{ color: 'var(--text-secondary)' }}>مجموع خالص دریافتی تمام موقعیت‌ها:</span>
-            <span style={{ fontWeight: 800, color: '#34d399', fontSize: '1.05rem' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>مجموع خالص تمام موقعیت‌ها:</span>
+            <span style={{ fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>
               {formatToman(stats.totalTeacherNet)}
             </span>
           </div>
