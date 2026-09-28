@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   LogIn, 
@@ -90,47 +91,15 @@ export function AuthModal() {
     }
   };
 
-  return (
-    <div 
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-        animation: 'fadeIn 0.2s ease-out'
-      }}
-      onClick={isGated ? undefined : closeAuthModal}
-    >
+  const modalJSX = (
+    <div className="modal-overlay" onClick={isGated ? undefined : closeAuthModal}>
       <div 
-        style={{
-          width: '100%',
-          maxWidth: '440px',
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '1.25rem',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          direction: 'rtl'
-        }}
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '440px', direction: 'rtl' }}
       >
         {/* Header */}
-        <div style={{
-          padding: '1.25rem 1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid var(--border-color)',
-          backgroundColor: 'rgba(255, 255, 255, 0.02)'
-        }}>
+        <div className="modal-header-fixed">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               width: '40px',
@@ -231,7 +200,7 @@ export function AuthModal() {
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className="modal-body-scrollable" style={{ padding: '1.25rem 1.5rem', gap: '1rem' }}>
           {errorMsg && (
             <div style={{
               padding: '0.75rem',
@@ -473,4 +442,6 @@ export function AuthModal() {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }

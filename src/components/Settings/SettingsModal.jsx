@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   Settings, 
@@ -74,48 +75,15 @@ export function SettingsModal({
     }
   };
 
-  return (
-    <div 
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        zIndex: 9998,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-        animation: 'fadeIn 0.2s ease-out'
-      }}
-      onClick={onClose}
-    >
+  const modalJSX = (
+    <div className="modal-overlay" onClick={onClose}>
       <div 
-        style={{
-          width: '100%',
-          maxWidth: '560px',
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '1.25rem',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '90vh',
-          direction: 'rtl'
-        }}
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: '560px', direction: 'rtl' }}
       >
         {/* Modal Header */}
-        <div style={{
-          padding: '1.25rem 1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid var(--border-color)',
-          backgroundColor: 'rgba(255, 255, 255, 0.02)'
-        }}>
+        <div className="modal-header-fixed">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               width: '40px',
@@ -239,7 +207,7 @@ export function SettingsModal({
         </div>
 
         {/* Tab Contents */}
-        <div style={{ padding: '1.25rem 1.5rem', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="modal-body-scrollable" style={{ padding: '1.25rem 1.5rem', gap: '1.25rem' }}>
           
           {clearSuccessMsg && (
             <div style={{
@@ -687,4 +655,6 @@ export function SettingsModal({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }

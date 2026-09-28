@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Sparkles, RefreshCw, DollarSign, CheckCircle2 } from 'lucide-react';
 import { getTodayJalaliString, toPersianDigits } from '../../utils/jalali';
 import { formatToman } from '../../utils/formatters';
@@ -34,16 +35,11 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
 
   const calculatedDebt = Math.max(0, Number(fee) - Number(paid));
 
-  return (
+  const modalJSX = (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1.25rem 1.4rem',
-          borderBottom: '1px solid var(--border-color)',
-        }}>
+        {/* Fixed Header */}
+        <div className="modal-header-fixed">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{
               width: '36px',
@@ -59,20 +55,21 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
               <RefreshCw size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
                 تمدید بسته و دوره جدید
               </h3>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0 }}>
                 هنرجو: <strong style={{ color: 'var(--text-primary)' }}>{student.name}</strong> ({student.discipline})
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: '0.4rem', borderRadius: '8px' }}>
+          <button type="button" onClick={onClose} className="btn-ghost" style={{ padding: '0.4rem', borderRadius: '8px' }}>
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.4rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        {/* Scrollable Body */}
+        <form id="renewForm" onSubmit={handleSubmit} className="modal-body-scrollable">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-secondary)' }}>
@@ -180,25 +177,21 @@ export function PackageRenewModal({ isOpen, onClose, onRenew, student, location 
               placeholder="مثال: تمدید بسته پاییزه به همراه دریافت فیش واریزی"
             />
           </div>
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '0.75rem',
-            marginTop: '0.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid var(--border-color)'
-          }}>
-            <button type="button" onClick={onClose} className="btn btn-secondary">
-              انصراف
-            </button>
-            <button type="submit" className="btn btn-success">
-              <CheckCircle2 size={16} />
-              ثبت و تمدید دوره جدید
-            </button>
-          </div>
         </form>
+
+        {/* Fixed Footer */}
+        <div className="modal-footer-fixed">
+          <button type="button" onClick={onClose} className="btn btn-secondary">
+            انصراف
+          </button>
+          <button type="submit" form="renewForm" className="btn btn-success">
+            <CheckCircle2 size={16} />
+            ثبت و تمدید دوره جدید
+          </button>
+        </div>
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }

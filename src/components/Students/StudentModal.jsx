@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, User, Music, MapPin, Calendar, Award, Phone, DollarSign, Clock, BookOpen, Plus, Sparkles, Building2, Check } from 'lucide-react';
 import { getTodayJalaliString, toPersianDigits } from '../../utils/jalali';
 import { formatToman } from '../../utils/formatters';
@@ -267,17 +268,11 @@ export function StudentModal({
 
   const calculatedDebt = Math.max(0, (Number(formData.packageFee) || 0) - (Number(formData.paidAmount) || 0));
 
-  return (
+  const modalJSX = (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px' }}>
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1.25rem 1.5rem',
-          borderBottom: '1px solid var(--border-color)',
-        }}>
+        {/* Header - Fixed */}
+        <div className="modal-header-fixed">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{
               width: '38px',
@@ -293,10 +288,10 @@ export function StudentModal({
               <User size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
-                {editingStudent ? 'ویرایش پرونده هنرجو' : 'ثبت نام هنرجوی جدید'}
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                {activeStudent ? 'ویرایش پرونده هنرجو' : 'ثبت نام هنرجوی جدید'}
               </h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                 مشخصات فردی، ساز و هنر تخصصی، موقعیت کلاس و تنظیم بسته
               </p>
             </div>
@@ -306,8 +301,8 @@ export function StudentModal({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        {/* Form Body - Scrollable */}
+        <form id="studentForm" onSubmit={handleSubmit} className="modal-body-scrollable">
           {/* Row 1: Name & Phone */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
@@ -719,25 +714,20 @@ export function StudentModal({
               />
             </div>
           </div>
-
-          {/* Footer Actions */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '0.75rem',
-            marginTop: '0.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid var(--border-color)'
-          }}>
-            <button type="button" onClick={onClose} className="btn btn-secondary">
-              انصراف
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {editingStudent ? 'ذخیره پرونده هنرجو' : 'ثبت نام و ایجاد پرونده'}
-            </button>
-          </div>
         </form>
+
+        {/* Footer Actions - Fixed at bottom */}
+        <div className="modal-footer-fixed">
+          <button type="button" onClick={onClose} className="btn btn-secondary">
+            انصراف
+          </button>
+          <button type="submit" form="studentForm" className="btn btn-primary">
+            {activeStudent ? 'ذخیره پرونده هنرجو' : 'ثبت نام و ایجاد پرونده'}
+          </button>
+        </div>
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }

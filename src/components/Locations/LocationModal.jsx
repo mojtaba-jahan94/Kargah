@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, MapPin, Percent, DollarSign, Building2, Home, Landmark, Sparkles } from 'lucide-react';
 import { toPersianDigits } from '../../utils/jalali';
 import { formatToman } from '../../utils/formatters';
@@ -85,17 +86,11 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null,
 
   const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'];
 
-  return (
+  const modalJSX = (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1.25rem 1.5rem',
-          borderBottom: '1px solid var(--border-color)',
-        }}>
+        {/* Header - Fixed */}
+        <div className="modal-header-fixed">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{
               width: '36px',
@@ -111,10 +106,10 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null,
               <MapPin size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
-                {editingLocation ? 'ویرایش موقعیت / آموزشگاه' : 'افزودن موقعیت و آموزشگاه جدید'}
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                {activeLoc ? 'ویرایش موقعیت / آموزشگاه' : 'افزودن موقعیت و آموزشگاه جدید'}
               </h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                 تعریف درصد سهم آموزشگاه، اجاره پلاتو و تعرفه کلاس‌ها
               </p>
             </div>
@@ -124,8 +119,8 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null,
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        {/* Form Body - Scrollable */}
+        <form id="locationForm" onSubmit={handleSubmit} className="modal-body-scrollable">
           {/* Name & Type */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
             <div>
@@ -384,25 +379,20 @@ export function LocationModal({ isOpen, onClose, onSave, editingLocation = null,
               ))}
             </div>
           </div>
-
-          {/* Footer Actions */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '0.75rem',
-            marginTop: '0.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid var(--border-color)'
-          }}>
-            <button type="button" onClick={onClose} className="btn btn-secondary">
-              انصراف
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {editingLocation ? 'ذخیره تغییرات' : 'ایجاد موقعیت'}
-            </button>
-          </div>
         </form>
+
+        {/* Footer Actions - Fixed at bottom */}
+        <div className="modal-footer-fixed">
+          <button type="button" onClick={onClose} className="btn btn-secondary">
+            انصراف
+          </button>
+          <button type="submit" form="locationForm" className="btn btn-primary">
+            {activeLoc ? 'ذخیره تغییرات' : 'ایجاد موقعیت'}
+          </button>
+        </div>
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }

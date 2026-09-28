@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Wallet, DollarSign, Calendar, FileText, CheckCircle2 } from 'lucide-react';
 import { getTodayJalaliString, toPersianDigits } from '../../utils/jalali';
 import { formatToman } from '../../utils/formatters';
@@ -44,16 +45,11 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
     onClose();
   };
 
-  return (
+  const modalJSX = (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1.25rem 1.4rem',
-          borderBottom: '1px solid var(--border-color)',
-        }}>
+        {/* Fixed Header */}
+        <div className="modal-header-fixed">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{
               width: '36px',
@@ -69,20 +65,21 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
               <Wallet size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
                 ثبت واریزی و تسویه حساب
               </h3>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0 }}>
                 ثبت پرداخت شهریه و کسر خودکار از مانده بدهی
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: '0.4rem', borderRadius: '8px' }}>
+          <button type="button" onClick={onClose} className="btn-ghost" style={{ padding: '0.4rem', borderRadius: '8px' }}>
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '1.25rem 1.4rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        {/* Scrollable Body */}
+        <form id="paymentForm" onSubmit={handleSubmit} className="modal-body-scrollable">
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
               انتخاب هنرجو *
@@ -194,25 +191,21 @@ export function PaymentModal({ isOpen, onClose, onSavePayment, students, initial
               </span>
             </div>
           )}
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '0.75rem',
-            marginTop: '0.5rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid var(--border-color)'
-          }}>
-            <button type="button" onClick={onClose} className="btn btn-secondary">
-              انصراف
-            </button>
-            <button type="submit" className="btn btn-success">
-              <CheckCircle2 size={16} />
-              ثبت پرداخت
-            </button>
-          </div>
         </form>
+
+        {/* Fixed Footer */}
+        <div className="modal-footer-fixed">
+          <button type="button" onClick={onClose} className="btn btn-secondary">
+            انصراف
+          </button>
+          <button type="submit" form="paymentForm" className="btn btn-success">
+            <CheckCircle2 size={16} />
+            ثبت پرداخت
+          </button>
+        </div>
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }

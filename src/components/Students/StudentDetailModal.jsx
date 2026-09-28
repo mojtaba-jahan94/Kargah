@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   User, 
@@ -84,9 +85,9 @@ export function StudentDetailModal({
     setTimeout(() => setCopiedReminder(false), 2500);
   };
 
-  return (
+  const modalJSX = (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '820px', minHeight: '600px' }}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '820px' }}>
         {/* Header Profile Bar */}
         <div style={{
           padding: '1.25rem 1.4rem',
@@ -271,8 +272,8 @@ export function StudentDetailModal({
           })}
         </div>
 
-        {/* Tab Contents */}
-        <div style={{ padding: '1.25rem 1.4rem', maxHeight: '55vh', overflowY: 'auto' }}>
+        {/* Tab Contents - Scrollable Body */}
+        <div className="modal-body-scrollable" style={{ padding: '1.25rem 1.4rem' }}>
           {/* TAB 1: Assignments & Practice */}
           {activeTab === 'assignments' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -603,4 +604,6 @@ export function StudentDetailModal({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }

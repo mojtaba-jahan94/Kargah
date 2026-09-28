@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Smartphone, X, Share2, PlusSquare } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Download, X, Share2, PlusSquare } from 'lucide-react';
+import { PaintingIcon } from './PaintingIcon';
 
 export function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -57,35 +59,37 @@ export function InstallPWA() {
 
   return (
     <>
-      {/* Sleek Install Banner */}
+      {/* Sleek Install Banner with Official Painting Icon */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(139, 92, 246, 0.2))',
+        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(139, 92, 246, 0.15))',
         border: '1px solid var(--border-highlight)',
-        borderRadius: '12px',
-        padding: '0.65rem 1rem',
+        borderRadius: '14px',
+        padding: '0.75rem 1.1rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '0.75rem',
         marginBottom: '1rem',
-        fontSize: '0.85rem'
+        fontSize: '0.85rem',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            background: 'linear-gradient(135deg, #f59e0b, #8b5cf6)',
-            color: '#fff',
+            width: '38px',
+            height: '38px',
+            borderRadius: '11px',
+            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)',
+            border: '1px solid rgba(245, 158, 11, 0.45)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(245, 158, 11, 0.2)',
             flexShrink: 0
           }}>
-            <Smartphone size={18} />
+            <PaintingIcon size={22} />
           </div>
           <div>
-            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+            <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
               نصب وب‌اپلیکیشن «کارگاه» روی گوشی
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -98,7 +102,7 @@ export function InstallPWA() {
           <button
             onClick={handleInstallClick}
             className="btn btn-primary"
-            style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', minHeight: '34px' }}
+            style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', minHeight: '34px' }}
           >
             <Download size={14} />
             <span>نصب روی گوشی</span>
@@ -108,6 +112,7 @@ export function InstallPWA() {
             onClick={() => setIsDismissed(true)}
             className="btn-ghost"
             style={{ padding: '0.35rem', borderRadius: '6px' }}
+            title="بستن"
           >
             <X size={16} />
           </button>
@@ -115,11 +120,26 @@ export function InstallPWA() {
       </div>
 
       {/* iOS Safari Guide Modal */}
-      {showIOSGuide && (
+      {showIOSGuide && typeof document !== 'undefined' && createPortal(
         <div className="modal-overlay" onClick={() => setShowIOSGuide(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px', padding: '1.5rem' }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px', padding: '1.5rem', borderRadius: '18px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>راهنمای نصب روی آیفون (iOS)</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '9px',
+                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)',
+                  border: '1px solid rgba(245, 158, 11, 0.45)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <PaintingIcon size={18} />
+                </div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>راهنمای نصب وب‌اپلیکیشن «کارگاه»</h3>
+              </div>
               <button onClick={() => setShowIOSGuide(false)} className="btn-ghost" style={{ padding: '0.3rem' }}>
                 <X size={18} />
               </button>
@@ -149,7 +169,8 @@ export function InstallPWA() {
               متوجه شدم
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
